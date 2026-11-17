@@ -26,6 +26,15 @@ Consumer-goods demand is shaped by promotions, competitor moves, preferences, ev
 6. Feature Store → export CSV/JSON → API preview
 7. Optional: AI Copilot question
 
+## Demo dataset coverage
+
+`public/demo/sales.csv` + `public/demo/business-notes.csv` are synthetic and intentionally broad:
+
+- SKUs: Premium/Herbal shampoo, conditioner, kids wash, anti-dandruff serum
+- Retailers A–D and regions North/South/West/East
+- Signal cases: demand up/down, promotion, competitor, seasonality, preference, supply disruption, ambiguous/unknown, neutral/no-impact
+- Feature edge case: SKU005 mostly sales-only context (sparse commentary)
+
 ## Explicit non-goals (MVP)
 
 - No Docker / K8s / Redis / vector DB
