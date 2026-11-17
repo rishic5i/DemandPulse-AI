@@ -3,6 +3,8 @@ import { createAiProvider } from "@/providers/ai/provider.factory";
 import { AiProviderError } from "@/providers/ai/ai.types";
 import { assistantRequestSchema } from "@/schemas/signal";
 
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   const requestId = createRequestId();
 

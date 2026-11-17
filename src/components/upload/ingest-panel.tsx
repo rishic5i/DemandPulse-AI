@@ -190,8 +190,9 @@ export function IngestPanel({
                 <p className="font-medium">Live AI analysis failed</p>
                 <p>{error}</p>
                 <p className="mt-1 text-xs text-rose-700/80">
-                  Configure GROQ_API_KEY in .env.local. Mock results are never
-                  substituted silently.
+                  {/GROQ_API_KEY|API key/i.test(error)
+                    ? "Configure GROQ_API_KEY in .env.local."
+                    : "No mock results were substituted. Retry the demo or check Groq rate limits."}
                 </p>
               </div>
             </div>
