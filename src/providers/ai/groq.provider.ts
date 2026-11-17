@@ -13,6 +13,7 @@ import {
   SIGNAL_EXTRACTION_SYSTEM_PROMPT,
   buildExtractionUserPrompt,
 } from "@/modules/intelligence/prompts";
+import { sanitizeExtractedSignalsPayload } from "@/modules/intelligence/sanitize-extraction";
 
 const EXTRACTION_JSON_SCHEMA = {
   type: "object",
@@ -76,8 +77,9 @@ const EXTRACTION_JSON_SCHEMA = {
   },
 } as const;
 
-/** Strict JSON schema batches larger than this often fail on gpt-oss-20b. */
-const DEFAULT_BATCH_SIZE = 3;
+/** One request for the compact demo (~10 notes) keeps free-tier TPM under 8K. */
+const DEFAULT_BATCH_SIZE = 10;
+const DEFAULT_CONCURRENCY = 1;
 
 function getErrorMessage(error: unknown): string {
   const err = error as {
@@ -109,8 +111,10 @@ function mapGroqError(error: unknown): AiProviderError {
   const message = getErrorMessage(error);
 
   if (status === 429) {
+    const retryHint = /try again in ([^.\s]+(?:\s[^.\s]+)?)/i.exec(message);
+    const suffix = retryHint ? ` Try again in ${retryHint[1]}.` : " Wait briefly and retry.";
     return new AiProviderError(
-      "Groq rate limit exceeded. Wait briefly and retry.",
+      `Groq rate limit exceeded.${suffix}`,
       "RATE_LIMITED",
       429,
       true,
@@ -140,7 +144,7 @@ function mapGroqError(error: unknown): AiProviderError {
 
 async function withRetries<T>(
   fn: () => Promise<T>,
-  attempts = 3,
+  attempts = 2,
 ): Promise<T> {
   let lastError: unknown;
   for (let i = 0; i < attempts; i += 1) {
@@ -150,7 +154,7 @@ async function withRetries<T>(
       lastError = error;
       const mapped = mapGroqError(error);
       if (!mapped.retryable || i === attempts - 1) throw mapped;
-      await new Promise((r) => setTimeout(r, 600 * (i + 1)));
+      await new Promise((r) => setTimeout(r, 800 * (i + 1)));
     }
   }
   throw mapGroqError(lastError);
@@ -161,7 +165,7 @@ export class GroqProvider implements AiProvider {
   readonly model: string;
   private client: Groq | null = null;
 
-  constructor(model = process.env.GROQ_MODEL || "openai/gpt-oss-20b") {
+  constructor(model = process.env.GROQ_MODEL || "qwen/qwen3.8-27b") {
     this.model = model;
     const apiKey = process.env.GROQ_API_KEY;
     if (apiKey) {
@@ -245,13 +249,15 @@ export class GroqProvider implements AiProvider {
       );
     }
 
-    const validated = extractedSignalsResponseSchema.safeParse(parsedJson);
+    const validated = extractedSignalsResponseSchema.safeParse(
+      sanitizeExtractedSignalsPayload(parsedJson),
+    );
     if (!validated.success) {
       throw new AiProviderError(
         "Groq response failed Zod validation.",
         "INVALID_RESPONSE",
         undefined,
-        mode === "strict",
+        true,
       );
     }
 
@@ -270,16 +276,16 @@ export class GroqProvider implements AiProvider {
     promptTokens: number;
     completionTokens: number;
   }> {
+    // Prefer json_object + Zod: strict schema payloads are large and burn free-tier TPM.
     try {
-      return await this.extractBatch(batch, catalogJson, "strict");
+      return await this.extractBatch(batch, catalogJson, "json_object");
     } catch (error) {
       const mapped = mapGroqError(error);
 
-      // Split oversized batches that fail constrained decoding.
       if (
         mapped.code === "INVALID_RESPONSE" &&
         batch.length > 1 &&
-        (isJsonValidateFailure(error) || mapped.retryable)
+        mapped.retryable
       ) {
         const mid = Math.ceil(batch.length / 2);
         const left = await this.extractBatchWithFallback(
@@ -297,10 +303,9 @@ export class GroqProvider implements AiProvider {
         };
       }
 
-      // Last resort for a single note: json_object + Zod (still no silent mocks).
-      if (batch.length === 1) {
+      if (batch.length === 1 && mapped.code === "INVALID_RESPONSE") {
         try {
-          return await this.extractBatch(batch, catalogJson, "json_object");
+          return await this.extractBatch(batch, catalogJson, "strict");
         } catch (fallbackError) {
           throw mapGroqError(fallbackError);
         }
@@ -313,14 +318,10 @@ export class GroqProvider implements AiProvider {
   async extractSignals(
     input: ExtractSignalsInput,
   ): Promise<ExtractSignalsResult> {
+    // Compact catalog: one row per SKU keeps free-tier prompts small/fast.
     const uniqueCatalog = Array.from(
-      new Map(
-        input.salesContext.map((row) => [
-          `${row.sku}|${row.retailer}|${row.region}`,
-          row,
-        ]),
-      ).values(),
-    ).slice(0, 40);
+      new Map(input.salesContext.map((row) => [row.sku, row])).values(),
+    ).slice(0, 8);
 
     const catalogJson = JSON.stringify(uniqueCatalog, null, 2);
     const batches: ExtractSignalsInput["notes"][] = [];
@@ -328,14 +329,12 @@ export class GroqProvider implements AiProvider {
       batches.push(input.notes.slice(i, i + DEFAULT_BATCH_SIZE));
     }
 
-    // Limited concurrency keeps latency down without blowing free-tier RPM/TPM.
-    const concurrency = 2;
     const allSignals: ExtractSignalsResult["signals"] = [];
     let promptTokens = 0;
     let completionTokens = 0;
 
-    for (let i = 0; i < batches.length; i += concurrency) {
-      const slice = batches.slice(i, i + concurrency);
+    for (let i = 0; i < batches.length; i += DEFAULT_CONCURRENCY) {
+      const slice = batches.slice(i, i + DEFAULT_CONCURRENCY);
       const results = await Promise.all(
         slice.map((batch) => this.extractBatchWithFallback(batch, catalogJson)),
       );

@@ -18,13 +18,11 @@ export function buildExtractionUserPrompt(params: {
   notesJson: string;
   catalogJson: string;
 }): string {
-  return `Known catalog entities (use only if clearly matched; otherwise null):
-${params.catalogJson}
+  return `Catalog (match only if explicit; else null): ${params.catalogJson}
 
-Business notes to analyze:
-${params.notesJson}
+Notes: ${params.notesJson}
 
-Return JSON matching the schema with a signals array.`;
+Return JSON object {"signals":[...]} only.`;
 }
 
 export const ASSISTANT_SYSTEM_PROMPT = `You are DemandPulse AI Copilot. Answer only from the provided extracted signals and feature records.

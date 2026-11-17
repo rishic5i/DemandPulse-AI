@@ -12,12 +12,16 @@ import {
   SIGNAL_EXTRACTION_SYSTEM_PROMPT,
   buildExtractionUserPrompt,
 } from "@/modules/intelligence/prompts";
+import { sanitizeExtractedSignalsPayload } from "@/modules/intelligence/sanitize-extraction";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_FREE_MODEL = "openrouter/free";
 
-/** Strict JSON schema batches larger than this often fail on smaller free models. */
+/** Free-model batches stay small; Zod validates json_object output. */
 const DEFAULT_BATCH_SIZE = 3;
+/** 20 RPM free-tier; 2 keeps latency down without bursting free endpoints. */
+const DEFAULT_CONCURRENCY = 2;
+const REQUEST_TIMEOUT_MS = 75_000;
 
 const EXTRACTION_JSON_SCHEMA = {
   type: "object",
@@ -157,6 +161,24 @@ export function mapOpenRouterError(
   return new AiProviderError(message, "PROVIDER_ERROR", httpStatus, false);
 }
 
+function mapFetchFailure(error: unknown): AiProviderError {
+  if (error instanceof AiProviderError) return error;
+  const err = error as { name?: string; message?: string };
+  if (
+    err.name === "TimeoutError" ||
+    err.name === "AbortError" ||
+    /aborted|timeout/i.test(err.message || "")
+  ) {
+    return new AiProviderError(
+      "OpenRouter request timed out.",
+      "TIMEOUT",
+      504,
+      true,
+    );
+  }
+  return mapOpenRouterError(error);
+}
+
 async function withRetries<T>(
   fn: () => Promise<T>,
   attempts = 3,
@@ -167,12 +189,43 @@ async function withRetries<T>(
       return await fn();
     } catch (error) {
       lastError = error;
-      const mapped = mapOpenRouterError(error);
+      const mapped = mapFetchFailure(error);
       if (!mapped.retryable || i === attempts - 1) throw mapped;
-      await new Promise((r) => setTimeout(r, 800 * (i + 1)));
+      await new Promise((r) => setTimeout(r, 500 * (i + 1)));
     }
   }
-  throw mapOpenRouterError(lastError);
+  throw mapFetchFailure(lastError);
+}
+
+function parseJsonContent(content: string): unknown {
+  const trimmed = content.trim();
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)```$/i);
+  const raw = fenced ? fenced[1].trim() : trimmed;
+  return JSON.parse(raw);
+}
+
+async function mapPool<T, R>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+
+  async function run(): Promise<void> {
+    while (next < items.length) {
+      const index = next;
+      next += 1;
+      results[index] = await worker(items[index]);
+    }
+  }
+
+  const runners = Array.from(
+    { length: Math.min(concurrency, Math.max(items.length, 1)) },
+    () => run(),
+  );
+  await Promise.all(runners);
+  return results;
 }
 
 type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
@@ -230,30 +283,46 @@ export class OpenRouterProvider implements AiProvider {
       body.response_format = params.responseFormat;
     }
 
-    const response = await fetch(OPENROUTER_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer":
-          process.env.OPENROUTER_HTTP_REFERER ||
-          "https://demandpulse-ai.vercel.app",
-        "X-Title": process.env.OPENROUTER_APP_TITLE || "DemandPulse AI",
-      },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(90_000),
-    });
-
-    let payload: ChatCompletionResponse & OpenRouterErrorBody = {};
+    let response: Response;
     try {
-      payload = (await response.json()) as ChatCompletionResponse &
-        OpenRouterErrorBody;
-    } catch {
+      response = await fetch(OPENROUTER_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer":
+            process.env.OPENROUTER_HTTP_REFERER ||
+            "https://demandpulse-ai.vercel.app",
+          "X-Title": process.env.OPENROUTER_APP_TITLE || "DemandPulse AI",
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+    } catch (error) {
+      throw mapFetchFailure(error);
+    }
+
+    const rawText = await response.text();
+    let payload: ChatCompletionResponse & OpenRouterErrorBody = {};
+    if (rawText.trim()) {
+      try {
+        payload = JSON.parse(rawText) as ChatCompletionResponse &
+          OpenRouterErrorBody;
+      } catch {
+        // Upstream gateways sometimes return HTML/empty bodies — retry.
+        throw new AiProviderError(
+          "OpenRouter returned a non-JSON error body.",
+          "PROVIDER_ERROR",
+          response.status || 502,
+          true,
+        );
+      }
+    } else if (!response.ok) {
       throw new AiProviderError(
-        "OpenRouter returned a non-JSON error body.",
+        "OpenRouter returned an empty error body.",
         "PROVIDER_ERROR",
         response.status,
-        response.status >= 500,
+        true,
       );
     }
 
@@ -319,7 +388,7 @@ export class OpenRouterProvider implements AiProvider {
 
     let parsedJson: unknown;
     try {
-      parsedJson = JSON.parse(content);
+      parsedJson = parseJsonContent(content);
     } catch {
       throw new AiProviderError(
         "OpenRouter returned non-JSON content.",
@@ -329,13 +398,15 @@ export class OpenRouterProvider implements AiProvider {
       );
     }
 
-    const validated = extractedSignalsResponseSchema.safeParse(parsedJson);
+    const validated = extractedSignalsResponseSchema.safeParse(
+      sanitizeExtractedSignalsPayload(parsedJson),
+    );
     if (!validated.success) {
       throw new AiProviderError(
         "OpenRouter response failed Zod validation.",
         "INVALID_RESPONSE",
         undefined,
-        mode === "strict",
+        true,
       );
     }
 
@@ -354,10 +425,11 @@ export class OpenRouterProvider implements AiProvider {
     promptTokens: number;
     completionTokens: number;
   }> {
+    // Free models: prefer json_object + Zod first (strict schema often flakes).
     try {
-      return await this.extractBatch(batch, catalogJson, "strict");
+      return await this.extractBatch(batch, catalogJson, "json_object");
     } catch (error) {
-      const mapped = mapOpenRouterError(error);
+      const mapped = mapFetchFailure(error);
 
       if (
         mapped.code === "INVALID_RESPONSE" &&
@@ -380,11 +452,11 @@ export class OpenRouterProvider implements AiProvider {
         };
       }
 
-      if (batch.length === 1) {
+      if (batch.length === 1 && mapped.code === "INVALID_RESPONSE") {
         try {
-          return await this.extractBatch(batch, catalogJson, "json_object");
+          return await this.extractBatch(batch, catalogJson, "strict");
         } catch (fallbackError) {
-          throw mapOpenRouterError(fallbackError);
+          throw mapFetchFailure(fallbackError);
         }
       }
 
@@ -396,13 +468,8 @@ export class OpenRouterProvider implements AiProvider {
     input: ExtractSignalsInput,
   ): Promise<ExtractSignalsResult> {
     const uniqueCatalog = Array.from(
-      new Map(
-        input.salesContext.map((row) => [
-          `${row.sku}|${row.retailer}|${row.region}`,
-          row,
-        ]),
-      ).values(),
-    ).slice(0, 40);
+      new Map(input.salesContext.map((row) => [row.sku, row])).values(),
+    ).slice(0, 8);
 
     const catalogJson = JSON.stringify(uniqueCatalog, null, 2);
     const batches: ExtractSignalsInput["notes"][] = [];
@@ -410,16 +477,16 @@ export class OpenRouterProvider implements AiProvider {
       batches.push(input.notes.slice(i, i + DEFAULT_BATCH_SIZE));
     }
 
-    // Concurrency 1 keeps free-tier RPM/RPD safer on flaky endpoints.
+    const extractedBatches = await mapPool(
+      batches,
+      DEFAULT_CONCURRENCY,
+      (batch) => this.extractBatchWithFallback(batch, catalogJson),
+    );
+
     const allSignals: ExtractSignalsResult["signals"] = [];
     let promptTokens = 0;
     let completionTokens = 0;
-
-    for (const batch of batches) {
-      const extracted = await this.extractBatchWithFallback(
-        batch,
-        catalogJson,
-      );
+    for (const extracted of extractedBatches) {
       allSignals.push(...extracted.signals);
       promptTokens += extracted.promptTokens;
       completionTokens += extracted.completionTokens;
