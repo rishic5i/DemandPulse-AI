@@ -1,0 +1,45 @@
+# Build playbook
+
+Ordered process for any non-trivial change.
+
+## Steps
+
+1. **Orient**
+   - Read `AGENTS.md`
+   - Open `docs/agents/FILE_MAP.md`
+   - Run `git status` and inspect related files before editing
+
+2. **Specify the change**
+   - Name the user-visible outcome
+   - Identify modules touched (ingestion / intelligence / features / API / UI)
+
+3. **Preserve invariants**
+   - LLM = semantics only
+   - TypeScript = numerical features
+   - No silent AI mocks
+   - No invented entities
+
+4. **Implement the smallest path**
+   - Prefer extending existing modules
+   - Keep business logic out of React components
+   - Keep prompts in `src/modules/intelligence/prompts.ts`
+
+5. **Validate**
+   - Add/adjust Vitest coverage for pure logic
+   - Run:
+     ```bash
+     pnpm lint && pnpm typecheck && pnpm test && pnpm build
+     ```
+
+6. **Manual E2E smoke**
+   - `pnpm dev`
+   - Click **Run Full Demo**
+   - Confirm Overview → Signal Explorer → Feature Store → Export
+
+7. **Document**
+   - Update the matching file under `docs/` or `docs/agents/` when behavior changes
+   - Keep `AGENTS.md` as the index; put detail in referenced docs
+
+## Completion criterion
+
+Change is done only when quality gates pass, the demo path still works, and docs/agent pointers still describe real behavior.

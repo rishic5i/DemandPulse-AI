@@ -1,0 +1,14 @@
+---
+description: Groq provider, prompts, and signal schema rules
+globs: src/providers/ai/**/*.ts,src/modules/intelligence/**/*.ts,src/schemas/**/*.ts
+alwaysApply: false
+---
+
+Read `docs/agents/AI_PROVIDER.md` before editing AI extraction.
+
+Requirements:
+- Use official `groq-sdk`
+- Prefer structured JSON Schema outputs + Zod validation
+- Batch notes; handle 429 clearly
+- Unknown entities -> null / UNRESOLVED_ENTITIES
+- No fabricated signals on provider failure

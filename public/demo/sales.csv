@@ -1,0 +1,16 @@
+date,sku,product_name,retailer,region,units_sold,revenue
+2026-01-01,SKU001,Premium Shampoo,Retailer A,North,120,2400
+2026-01-02,SKU001,Premium Shampoo,Retailer A,North,135,2700
+2026-01-03,SKU001,Premium Shampoo,Retailer A,North,128,2560
+2026-01-04,SKU002,Herbal Shampoo,Retailer A,North,80,1600
+2026-01-05,SKU002,Herbal Shampoo,Retailer A,North,95,1900
+2026-01-06,SKU001,Premium Shampoo,Retailer B,South,110,2200
+2026-01-07,SKU003,Daily Conditioner,Retailer B,South,70,1400
+2026-01-08,SKU003,Daily Conditioner,Retailer B,South,74,1480
+2026-01-09,SKU002,Herbal Shampoo,Retailer B,South,60,1200
+2026-01-10,SKU001,Premium Shampoo,Retailer A,North,142,2840
+2026-01-11,SKU004,Kids Body Wash,Retailer C,West,55,990
+2026-01-12,SKU004,Kids Body Wash,Retailer C,West,58,1044
+2026-01-13,SKU003,Daily Conditioner,Retailer A,North,66,1320
+2026-01-14,SKU002,Herbal Shampoo,Retailer A,North,101,2020
+2026-01-15,SKU001,Premium Shampoo,Retailer B,South,118,2360
