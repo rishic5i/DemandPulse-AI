@@ -21,7 +21,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Demo path: **Try Demo → Analyze Signals → Signal Explorer → Feature Store → Export**.
+Demo path: **Run Full Demo → Overview → Signal Explorer → Feature Store → Export**.
 
 ## Stack
 
@@ -45,14 +45,30 @@ pnpm test
 pnpm build
 ```
 
-## Cursor / Claude Code
+## Cursor / Claude Code (hackathon agent setup)
 
-Both tools follow the same canonical instructions in [`AGENTS.md`](./AGENTS.md).
+Both tools share one instruction system — no divergent rulebooks.
 
-- Cursor: `.cursor/rules` references `AGENTS.md`
-- Claude Code: [`CLAUDE.md`](./CLAUDE.md) points to `AGENTS.md`
+| Entrypoint | Tool | Role |
+|---|---|---|
+| [`AGENTS.md`](./AGENTS.md) | Cursor + Claude Code | Canonical always-on rules |
+| [`CLAUDE.md`](./CLAUDE.md) | Claude Code | Pointer into shared docs |
+| [`.cursor/rules/`](./.cursor/rules/) | Cursor | Scoped rules by file area |
+| [`docs/agents/00-INDEX.md`](./docs/agents/00-INDEX.md) | Both | Task → reference map |
 
-No tool-specific runtime dependency is required to build or run the app.
+Detailed agent references:
+
+- [Product](docs/agents/PRODUCT.md)
+- [File map](docs/agents/FILE_MAP.md)
+- [Build playbook](docs/agents/BUILD_PLAYBOOK.md)
+- [Coding standards](docs/agents/CODING_STANDARDS.md)
+- [AI provider](docs/agents/AI_PROVIDER.md)
+- [API contract](docs/agents/API_CONTRACT.md)
+- [UI guide](docs/agents/UI_GUIDE.md)
+- [Testing](docs/agents/TESTING.md)
+- [Architecture guide](docs/agents/ARCHITECTURE_GUIDE.md)
+
+No Cursor subscription or Claude API key is required to build/run the application itself.
 
 ## Environment
 
@@ -75,3 +91,4 @@ GROQ_MODEL=openai/gpt-oss-20b
 - [Architecture](docs/ARCHITECTURE.md)
 - [API](docs/API.md)
 - [Development](docs/DEVELOPMENT.md)
+- [Agent index](docs/agents/00-INDEX.md)

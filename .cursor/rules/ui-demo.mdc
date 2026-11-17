@@ -1,0 +1,16 @@
+---
+description: Dashboard and hackathon demo UX rules
+globs: src/components/**/*.tsx,src/app/page.tsx,src/hooks/use-analysis.ts,docs/agents/UI_GUIDE.md
+alwaysApply: false
+---
+
+Read `docs/agents/UI_GUIDE.md` before UI changes.
+
+Preserve the demo path:
+1. Run Full Demo
+2. Live Groq extraction
+3. Overview with next-step cards
+4. Signal Explorer evidence
+5. Feature Store export
+
+Show explicit AI errors. Label synthetic demo data.

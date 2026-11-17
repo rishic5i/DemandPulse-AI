@@ -1,0 +1,13 @@
+---
+description: REST API route conventions
+globs: src/app/api/**/*.ts,docs/agents/API_CONTRACT.md,docs/API.md
+alwaysApply: false
+---
+
+Read `docs/agents/API_CONTRACT.md` when changing routes.
+
+- Validate with Zod
+- Include `requestId`
+- Consistent `{ error: { code, message, details } }`
+- Never expose secrets or stack traces
+- Document behavior changes in `docs/API.md`

@@ -7,6 +7,14 @@ import { parseNotesCsv, parsePastedNotes, parseSalesCsv } from "@/modules/ingest
 const STORAGE_KEY = "demandpulse_analysis_v1";
 const listeners = new Set<() => void>();
 
+export type PipelineStage =
+  | "idle"
+  | "loading_demo"
+  | "ready"
+  | "extracting"
+  | "complete"
+  | "error";
+
 function emitStorage() {
   listeners.forEach((listener) => listener());
 }
@@ -43,6 +51,23 @@ function parseAnalysis(raw: string | null): AnalysisResult | null {
   }
 }
 
+async function runAnalyzeRequest(
+  sales: SalesRow[],
+  notes: BusinessNote[],
+  demoMode: boolean,
+): Promise<AnalysisResult> {
+  const response = await fetch("/api/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ sales, notes, demoMode }),
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload?.error?.message || "Analysis failed");
+  }
+  return payload.analysis as AnalysisResult;
+}
+
 export function useAnalysis() {
   const storedRaw = useSyncExternalStore(subscribe, getStoredRaw, () => null);
   const analysis = parseAnalysis(storedRaw);
@@ -58,6 +83,9 @@ export function useAnalysis() {
   const [aiConfigured, setAiConfigured] = useState<boolean | null>(null);
   const [hasChosenView, setHasChosenView] = useState(false);
   const [ingestIsDemo, setIngestIsDemo] = useState(false);
+  const [stage, setStage] = useState<PipelineStage>(
+    analysis ? "complete" : "idle",
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -76,6 +104,7 @@ export function useAnalysis() {
 
   const loadDemo = useCallback(async () => {
     setError(null);
+    setStage("loading_demo");
     const [salesRes, notesRes] = await Promise.all([
       fetch("/demo/sales.csv").then((r) => r.text()),
       fetch("/demo/business-notes.csv").then((r) => r.text()),
@@ -88,6 +117,11 @@ export function useAnalysis() {
     setNotesIssues(notesParsed.issues.map((i) => `Row ${i.row}: ${i.message}`));
     setPastedNotes("");
     setIngestIsDemo(true);
+    setStage("ready");
+    return {
+      sales: salesParsed.data,
+      notes: notesParsed.data,
+    };
   }, []);
 
   const onSalesFile = useCallback(async (file: File) => {
@@ -96,7 +130,8 @@ export function useAnalysis() {
     setSales(parsed.data);
     setSalesIssues(parsed.issues.map((i) => `Row ${i.row}: ${i.message}`));
     setIngestIsDemo(false);
-  }, []);
+    setStage(parsed.data.length > 0 && notes.length > 0 ? "ready" : "idle");
+  }, [notes.length]);
 
   const onNotesFile = useCallback(async (file: File) => {
     const text = await file.text();
@@ -104,48 +139,61 @@ export function useAnalysis() {
     setNotes(parsed.data);
     setNotesIssues(parsed.issues.map((i) => `Row ${i.row}: ${i.message}`));
     setIngestIsDemo(false);
-  }, []);
+    setStage(sales.length > 0 && parsed.data.length > 0 ? "ready" : "idle");
+  }, [sales.length]);
 
   const applyPastedNotes = useCallback(() => {
     const parsed = parsePastedNotes(pastedNotes);
     setNotes(parsed);
     setNotesIssues(parsed.length === 0 ? ["No notes detected in pasted text"] : []);
     setIngestIsDemo(false);
-  }, [pastedNotes]);
+    setStage(sales.length > 0 && parsed.length > 0 ? "ready" : "idle");
+  }, [pastedNotes, sales.length]);
 
   const analyze = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setStage("extracting");
     try {
-      const response = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sales,
-          notes,
-          demoMode: ingestIsDemo,
-        }),
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        throw new Error(payload?.error?.message || "Analysis failed");
-      }
-      const result = payload.analysis as AnalysisResult;
+      const result = await runAnalyzeRequest(sales, notes, ingestIsDemo);
       writeAnalysis(result);
       setHasChosenView(true);
       setView("overview");
+      setStage("complete");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed");
+      setStage("error");
     } finally {
       setLoading(false);
     }
   }, [sales, notes, ingestIsDemo]);
 
+  const runFullDemo = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setStage("loading_demo");
+    try {
+      const demo = await loadDemo();
+      setStage("extracting");
+      const result = await runAnalyzeRequest(demo.sales, demo.notes, true);
+      writeAnalysis(result);
+      setHasChosenView(true);
+      setView("overview");
+      setStage("complete");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Demo analysis failed");
+      setStage("error");
+    } finally {
+      setLoading(false);
+    }
+  }, [loadDemo]);
+
   const clearAnalysis = useCallback(() => {
     writeAnalysis(null);
     setHasChosenView(true);
     setView("upload");
-  }, []);
+    setStage(sales.length > 0 && notes.length > 0 ? "ready" : "idle");
+  }, [sales.length, notes.length]);
 
   const onViewChange = useCallback((next: AppView) => {
     setHasChosenView(true);
@@ -156,6 +204,7 @@ export function useAnalysis() {
   const demoMode = Boolean(analysis?.demoMode);
   const effectiveView =
     !hasChosenView && analysis && view === "upload" ? "overview" : view;
+  const effectiveStage = analysis && stage === "idle" ? "complete" : stage;
 
   return {
     view: effectiveView,
@@ -170,6 +219,7 @@ export function useAnalysis() {
     onSalesFile,
     onNotesFile,
     loadDemo,
+    runFullDemo,
     analyze,
     loading,
     error,
@@ -178,5 +228,6 @@ export function useAnalysis() {
     ready,
     aiConfigured,
     clearAnalysis,
+    stage: effectiveStage,
   };
 }

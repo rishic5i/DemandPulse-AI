@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, FileSpreadsheet, Sparkles } from "lucide-react";
+import { AlertCircle, FileSpreadsheet, Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PipelineStatus } from "@/components/layout/pipeline-status";
+import type { PipelineStage } from "@/hooks/use-analysis";
 import type { BusinessNote, SalesRow } from "@/types/domain";
 
 export function IngestPanel({
@@ -22,10 +24,13 @@ export function IngestPanel({
   onSalesFile,
   onNotesFile,
   loadDemo,
+  runFullDemo,
   analyze,
   loading,
   error,
   ready,
+  stage,
+  aiConfigured,
 }: {
   sales: SalesRow[];
   notes: BusinessNote[];
@@ -36,14 +41,48 @@ export function IngestPanel({
   applyPastedNotes: () => void;
   onSalesFile: (file: File) => void;
   onNotesFile: (file: File) => void;
-  loadDemo: () => Promise<void>;
+  loadDemo: () => Promise<unknown>;
+  runFullDemo: () => Promise<void>;
   analyze: () => Promise<void>;
   loading: boolean;
   error: string | null;
   ready: boolean;
+  stage: PipelineStage;
+  aiConfigured: boolean | null;
 }) {
   return (
     <div className="space-y-6">
+      <PipelineStatus stage={stage} />
+
+      <Card className="border-sky-500/20 bg-gradient-to-br from-slate-900/90 to-slate-950/90">
+        <CardHeader>
+          <CardTitle>Hackathon demo — one click</CardTitle>
+          <CardDescription>
+            Loads synthetic sales + business notes, runs live Groq extraction,
+            then opens the overview with signals and forecasting features.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-center gap-3">
+          <Button size="lg" disabled={loading} onClick={() => void runFullDemo()}>
+            <Play className="h-4 w-4" />
+            {loading ? "Running full demo…" : "Run Full Demo"}
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={loading}
+            onClick={() => void loadDemo()}
+          >
+            <Sparkles className="h-4 w-4" />
+            Load demo data only
+          </Button>
+          {aiConfigured === false && (
+            <p className="text-sm text-amber-200">
+              Groq key missing — set GROQ_API_KEY in .env.local before analyzing.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Ingest demand context</CardTitle>
@@ -54,10 +93,6 @@ export function IngestPanel({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-3">
-            <Button onClick={() => void loadDemo()} variant="secondary">
-              <Sparkles className="h-4 w-4" />
-              Try Demo
-            </Button>
             <a href="/demo/sales.csv" download>
               <Button variant="ghost" type="button">
                 Sample sales CSV

@@ -8,108 +8,55 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# DemandPulse AI — Agent Instructions
+# DemandPulse AI — Canonical Agent Instructions
 
-This file is the **canonical** engineering instruction set for Cursor, Claude Code, and human contributors.
+Shared by **Cursor**, **Claude Code**, and human contributors. Detailed references live under `docs/agents/` — open them by task instead of copying rules here.
 
-## Product
+## Mission
 
-DemandPulse AI converts unstructured consumer-goods business notes into validated demand/supply signals and deterministic numerical features that forecasting systems can consume.
-
-Tagline: Turn hidden business signals into intelligent demand features.
+Build and preserve DemandPulse AI: convert unstructured consumer-goods notes into validated demand/supply signals and deterministic forecasting features.
 
 ## Stack
 
-- Next.js App Router + TypeScript
-- pnpm
-- Tailwind CSS + lightweight UI primitives
-- Zod validation
-- PapaParse CSV parsing
-- Recharts
-- Vitest
-- Groq (`groq-sdk`) for AI inference
-- Deploy target: Vercel
+Next.js App Router · TypeScript · pnpm · Tailwind · Zod · PapaParse · Recharts · Vitest · Groq (`openai/gpt-oss-20b`) · Vercel
 
-## Architecture
+## Reference map (open when needed)
 
-Modular monolith:
+| Need | Open |
+|---|---|
+| Agent docs index | `docs/agents/00-INDEX.md` |
+| Product / demo path | `docs/agents/PRODUCT.md` |
+| File locations | `docs/agents/FILE_MAP.md` |
+| Implement a change | `docs/agents/BUILD_PLAYBOOK.md` |
+| Coding rules | `docs/agents/CODING_STANDARDS.md` |
+| Groq / prompts | `docs/agents/AI_PROVIDER.md` |
+| REST contracts | `docs/agents/API_CONTRACT.md` |
+| UI / demo UX | `docs/agents/UI_GUIDE.md` |
+| Tests / gates | `docs/agents/TESTING.md` |
+| Architecture | `docs/agents/ARCHITECTURE_GUIDE.md` + `docs/ARCHITECTURE.md` |
+| Research decisions | `docs/TECHNICAL_RESEARCH.md` |
 
-- `src/app` — UI routes + REST API routes
-- `src/modules/ingestion` — CSV/text parsing
-- `src/modules/intelligence` — prompts + signal normalization
-- `src/modules/features` — deterministic feature engineering
-- `src/providers/ai` — AI provider abstraction (Groq)
-- `src/schemas` — Zod schemas
-- `src/components` — UI only; no business formulas
+## Hard invariants
 
-Rules:
+1. LLM extracts semantic events only; TypeScript calculates numerical features.
+2. Never invent SKU, retailer, region, dates, or quantities.
+3. Never silently mock AI when live inference fails.
+4. Keep demand features separate from supply-risk features.
+5. Secrets stay server-side (`GROQ_API_KEY` only — never `NEXT_PUBLIC_*`).
+6. Assume serverless: no durable server memory/filesystem.
+7. Package manager is **pnpm** only.
 
-1. LLM extracts semantic events only.
-2. TypeScript calculates numerical features.
-3. Never invent SKU/retailer/region/dates.
-4. Never silently mock AI when live inference fails.
-5. Keep demand features separate from supply-risk features.
-6. Assume serverless: no durable server filesystem/memory.
+## Working loop
 
-## Coding conventions
+1. `git status` + read relevant `docs/agents/*` files
+2. Prefer extending existing modules over rewrites
+3. Keep prompts in `src/modules/intelligence/prompts.ts`
+4. Keep feature math in `src/modules/features/generate.ts`
+5. Before finish: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`
+6. Manual smoke: **Run Full Demo** → Explorer → Feature Store → Export
 
-- Strict TypeScript; avoid `any`.
-- Validate external + AI inputs with Zod.
-- Prefer small focused modules.
-- Keep prompts in `src/modules/intelligence/prompts.ts`.
-- Name files with kebab-case; React components PascalCase exports.
-- Do not add dependencies unless required for MVP value.
+## Cursor vs Claude Code
 
-## API conventions
-
-- `/api/health` — config status, no secrets
-- `/api/analyze` — extract signals + generate features
-- `/api/features?runId=` — best-effort in-memory lookup
-- `/api/assistant` — Q&A over provided analysis context
-
-All responses include `requestId`. Errors use `{ error: { code, message, details } }`.
-
-## AI provider rules
-
-- Provider selected by `AI_PROVIDER` (default `groq`).
-- Keys server-side only. Never `NEXT_PUBLIC_GROQ_*`.
-- Default model: `openai/gpt-oss-20b`.
-- Use JSON Schema structured outputs + Zod validation.
-- Handle 429/quota with clear errors.
-- Batch notes to respect rate limits.
-
-## Testing
-
-- Unit tests in `tests/unit`.
-- Mock AI in automated tests; never require live keys in CI.
-- Before commit: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`.
-
-## Security
-
-- Do not commit `.env.local` or secrets.
-- Do not log full uploaded customer data unnecessarily.
-- Limit upload/payload sizes.
-- Use synthetic/public demo data only.
-
-## Git / delivery
-
-- Branch from `main` using `feature/...`.
-- Small descriptive commits.
-- CI via GitHub Actions (lint/typecheck/test/build).
-- Do not force-push `main`.
-- Do not merge without authorization.
-
-## Docs updates
-
-When behavior changes, update:
-
-- `README.md`
-- `docs/API.md`
-- `docs/ARCHITECTURE.md`
-- `docs/TECHNICAL_RESEARCH.md` (provider/model decisions)
-
-## Preserve existing work
-
-- Inspect git status before large edits.
-- Do not overwrite unrelated changes.
-- Prefer extending modules over rewriting.
+- **Cursor**: follows this file + `.cursor/rules/*.mdc` (scoped by globs)
+- **Claude Code**: starts at `CLAUDE.md`, which points here and to `docs/agents/`
+- Do not maintain divergent instruction sets; change the canonical docs once

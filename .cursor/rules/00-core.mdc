@@ -1,0 +1,14 @@
+---
+description: DemandPulse core invariants for every Cursor session
+alwaysApply: true
+---
+
+Follow `AGENTS.md` and open `docs/agents/00-INDEX.md` for task-specific references.
+
+Hard invariants:
+- pnpm only
+- LLM extracts semantics; TypeScript computes features
+- Never invent entities; never silent-mock AI failures
+- Separate demand vs supply-risk features
+- Keep secrets server-side (`GROQ_API_KEY`)
+- Prefer extending modules; update docs/agents when behavior changes

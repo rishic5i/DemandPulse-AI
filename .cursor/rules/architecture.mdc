@@ -1,0 +1,14 @@
+---
+description: Architecture and module boundary rules
+globs: src/modules/**/*.ts,src/providers/**/*.ts,src/app/api/**/*.ts,docs/agents/ARCHITECTURE_GUIDE.md,docs/ARCHITECTURE.md
+alwaysApply: false
+---
+
+Read `docs/agents/ARCHITECTURE_GUIDE.md` and `docs/agents/FILE_MAP.md` before structural changes.
+
+Keep boundaries:
+- ingestion parses
+- intelligence/prompts + normalize validate semantics
+- features compute deterministic numbers
+- API routes adapt HTTP only
+- components do not own formulas
