@@ -36,7 +36,7 @@ export function PipelineStatus({ stage }: { stage: PipelineStage }) {
           End-to-end pipeline
         </p>
         <p className="text-xs text-slate-500">
-          {stage === "extracting" && "Live Groq extraction running…"}
+          {stage === "extracting" && "Live AI extraction running…"}
           {stage === "loading_demo" && "Loading synthetic demo dataset…"}
           {stage === "ready" && "Data ready — run analysis"}
           {stage === "complete" && "Signals + features ready"}

@@ -1,34 +1,50 @@
 # Technical Research
 
-Verification date: 2026-11-17
+Verification date: 2026-11-17 (updated for OpenRouter free tier)
 
 ## AI provider decision
 
-Selected: **GroqCloud** with official `groq-sdk`.
+Primary: **OpenRouter** free models (`openrouter/free` or `*:free`) via OpenAI-compatible HTTP API.
 
-Rejected alternatives for this MVP: Gemini (explicitly disallowed by build brief), OpenAI paid-first flows, local models (too heavy for 8 GB hackathon machines).
+Fallback: **GroqCloud** with official `groq-sdk` and `openai/gpt-oss-20b`.
 
-## Selected model
+Rejected alternatives for this MVP: Gemini (explicitly disallowed by build brief), OpenAI paid-first flows, local Ollama (works locally but not on Vercel Hobby without a remote host).
 
-**`openai/gpt-oss-20b`**
+## Selected models
 
-Reasons:
+**OpenRouter:** `openrouter/free`
 
-- Listed as a production Groq model.
-- Supports Structured Outputs with `strict: true` JSON Schema mode.
-- Suitable for extraction tasks with bounded free-tier limits.
-- Faster/cheaper than `openai/gpt-oss-120b` for hackathon volume.
+- Router selects available free models that support requested features (including structured outputs when present)
+- $0 token cost; no credit card required
+- Guardrail: never configure paid model fallbacks (avoids 402 charges on empty balance)
+
+**Groq fallback:** `openai/gpt-oss-20b`
+
+- Supports Structured Outputs with `strict: true` JSON Schema mode
+- Suitable for extraction tasks with bounded free-tier limits
 
 Sources:
 
+- https://openrouter.ai/openrouter/free
+- https://openrouter.ai/docs/guides/routing/model-variants/free
+- https://openrouter.ai/docs/api_reference/limits
 - https://console.groq.com/docs/models
-- https://console.groq.com/docs/model/openai/gpt-oss-20b
 - https://console.groq.com/docs/structured-outputs
-- https://console.groq.com/docs/rate-limits
 
-## Free-tier limitations (high-level Groq table)
+## Free-tier limitations
 
-For `openai/gpt-oss-20b` (organization-level; confirm on account Limits page):
+### OpenRouter (`:free` / `openrouter/free`, no credits purchased)
+
+| Limit | Value |
+|---|---|
+| RPM | 20 |
+| RPD | 50 |
+
+Purchasing ≥ ~$10 credits lifetime raises free RPD to 1000 (optional; not required).
+
+Full Demo (~27 notes, batch size 3) ≈ 9–15 requests → roughly 3–5 full demos/day on the no-card tier.
+
+### Groq (`openai/gpt-oss-20b`, organization-level; confirm on account Limits page)
 
 - 30 RPM
 - 1,000 RPD
@@ -37,7 +53,8 @@ For `openai/gpt-oss-20b` (organization-level; confirm on account Limits page):
 
 MVP mitigations:
 
-- Batch notes (8/note batch)
+- Batch notes (3/note batch)
+- OpenRouter concurrency 1; Groq concurrency 2
 - Bounded retries on HTTP 429
 - Cache analysis client-side (`sessionStorage`)
 - Clear UI errors when key/quota missing — no silent mocks
@@ -66,4 +83,4 @@ Sources:
 - React 19
 - Zod 4
 - Vitest 5
-- groq-sdk 1.x
+- groq-sdk 1.x (Groq path); OpenRouter uses native `fetch`

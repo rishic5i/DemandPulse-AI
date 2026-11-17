@@ -5,7 +5,7 @@
 DemandPulse AI is a Next.js modular monolith:
 
 ```text
-Browser UI  ->  /api/analyze  ->  Groq extraction
+Browser UI  ->  /api/analyze  ->  AI extraction (OpenRouter / Groq)
                               ->  normalize signals
                               ->  deterministic features
             ->  dashboard / explorer / feature store / export
@@ -17,7 +17,7 @@ Browser UI  ->  /api/analyze  ->  Groq extraction
 1. User uploads sales CSV + notes CSV/text (or loads demo files).
 2. Client validates/parses with PapaParse + Zod.
 3. `POST /api/analyze` sends parsed rows to the server.
-4. Groq extracts structured events via JSON Schema.
+4. Configured AI provider extracts structured events via JSON Schema.
 5. Server validates with Zod, resolves entities against sales catalog, deduplicates.
 6. Feature engine computes numerical features in TypeScript.
 7. Response returns full analysis payload; UI stores it in memory + `sessionStorage`.
@@ -40,7 +40,7 @@ Implemented in `src/modules/features/generate.ts`.
 
 ## Security boundaries
 
-- `GROQ_API_KEY` server-only.
+- `OPENROUTER_API_KEY` / `GROQ_API_KEY` server-only.
 - Health endpoint never returns secrets.
 - API errors omit stack traces.
 - Upload/text size capped in ingestion helpers.

@@ -4,7 +4,10 @@ import { createAiProvider } from "@/providers/ai/provider.factory";
 export async function GET() {
   const requestId = createRequestId();
   let providerName = process.env.AI_PROVIDER || "groq";
-  let model = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
+  let model =
+    process.env.OPENROUTER_MODEL ||
+    process.env.GROQ_MODEL ||
+    "openai/gpt-oss-20b";
   let configured = false;
 
   try {

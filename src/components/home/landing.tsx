@@ -40,7 +40,7 @@ export function HomeLanding({
             </Button>
           </div>
           <p className="mt-4 text-xs text-slate-500">
-            Demo uses clearly labeled synthetic data. Live extraction runs on Groq.
+            Demo uses clearly labeled synthetic data. Live extraction runs via the configured AI provider.
           </p>
         </div>
       </section>
@@ -55,7 +55,7 @@ export function HomeLanding({
           {
             icon: Sparkles,
             title: "Extract explainable signals",
-            body: "Groq classifies demand vs supply events with evidence and confidence.",
+            body: "AI classifies demand vs supply events with evidence and confidence.",
           },
           {
             icon: LineChart,

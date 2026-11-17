@@ -74,8 +74,8 @@ export function AppShell({
               {aiConfigured == null
                 ? "Checking AI…"
                 : aiConfigured
-                  ? "Groq configured"
-                  : "Groq key missing"}
+                  ? "AI configured"
+                  : "AI key missing"}
             </Badge>
             <Badge>
               {hasAnalysis ? "Analysis ready" : "Awaiting upload"}

@@ -18,7 +18,7 @@ Build and preserve DemandPulse AI: convert unstructured consumer-goods notes int
 
 ## Stack
 
-Next.js App Router · TypeScript · pnpm · Tailwind · Zod · PapaParse · Recharts · Vitest · Groq (`openai/gpt-oss-20b`) · Vercel
+Next.js App Router · TypeScript · pnpm · Tailwind · Zod · PapaParse · Recharts · Vitest · OpenRouter (`openrouter/free`) / Groq fallback · Vercel
 
 ## Reference map (open when needed)
 
@@ -31,7 +31,7 @@ Next.js App Router · TypeScript · pnpm · Tailwind · Zod · PapaParse · Rech
 | Git / PR workflow | `docs/agents/GIT_WORKFLOW.md` |
 | Security gates | `docs/agents/SECURITY.md` |
 | Coding rules | `docs/agents/CODING_STANDARDS.md` |
-| Groq / prompts | `docs/agents/AI_PROVIDER.md` |
+| AI provider / prompts | `docs/agents/AI_PROVIDER.md` |
 | REST contracts | `docs/agents/API_CONTRACT.md` |
 | UI / demo UX | `docs/agents/UI_GUIDE.md` |
 | Tests / gates | `docs/agents/TESTING.md` |
@@ -44,7 +44,7 @@ Next.js App Router · TypeScript · pnpm · Tailwind · Zod · PapaParse · Rech
 2. Never invent SKU, retailer, region, dates, or quantities.
 3. Never silently mock AI when live inference fails.
 4. Keep demand features separate from supply-risk features.
-5. Secrets stay server-side (`GROQ_API_KEY` only — never `NEXT_PUBLIC_*`).
+5. Secrets stay server-side (`OPENROUTER_API_KEY` / `GROQ_API_KEY` only — never `NEXT_PUBLIC_*`).
 6. Assume serverless: no durable server memory/filesystem.
 7. Package manager is **pnpm** only.
 8. **Never push directly to `main`.** Use `feature/...` + PR + green CI (Quality + Security).

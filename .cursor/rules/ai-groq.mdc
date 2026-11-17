@@ -1,5 +1,5 @@
 ---
-description: Groq provider, prompts, and signal schema rules
+description: AI provider, prompts, and signal schema rules
 globs: src/providers/ai/**/*.ts,src/modules/intelligence/**/*.ts,src/schemas/**/*.ts
 alwaysApply: false
 ---
@@ -7,8 +7,9 @@ alwaysApply: false
 Read `docs/agents/AI_PROVIDER.md` before editing AI extraction.
 
 Requirements:
-- Use official `groq-sdk`
+- OpenRouter free models (`openrouter/free` or `*:free`) via fetch, or Groq via `groq-sdk`
 - Prefer structured JSON Schema outputs + Zod validation
+- Never configure paid OpenRouter fallbacks
 - Batch notes; handle 429 clearly
 - Unknown entities -> null / UNRESOLVED_ENTITIES
 - No fabricated signals on provider failure
