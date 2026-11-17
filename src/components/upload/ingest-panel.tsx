@@ -58,7 +58,7 @@ export function IngestPanel({
         <CardHeader>
           <CardTitle>Hackathon demo — one click</CardTitle>
           <CardDescription>
-            Loads synthetic sales + business notes, runs live Groq extraction,
+            Loads synthetic sales + business notes, runs live AI extraction,
             then opens the overview with signals and forecasting features.
           </CardDescription>
         </CardHeader>
@@ -77,7 +77,8 @@ export function IngestPanel({
           </Button>
           {aiConfigured === false && (
             <p className="text-sm text-amber-800">
-              Groq key missing — set GROQ_API_KEY in .env.local before analyzing.
+              AI key missing — set OPENROUTER_API_KEY or GROQ_API_KEY in
+              .env.local (and matching AI_PROVIDER) before analyzing.
             </p>
           )}
         </CardContent>
@@ -190,9 +191,9 @@ export function IngestPanel({
                 <p className="font-medium">Live AI analysis failed</p>
                 <p>{error}</p>
                 <p className="mt-1 text-xs text-rose-700/80">
-                  {/GROQ_API_KEY|API key/i.test(error)
-                    ? "Configure GROQ_API_KEY in .env.local."
-                    : "No mock results were substituted. Retry the demo or check Groq rate limits."}
+                  {/OPENROUTER_API_KEY|GROQ_API_KEY|API key/i.test(error)
+                    ? "Configure the matching AI provider key in .env.local."
+                    : "No mock results were substituted. Retry the demo or check provider rate limits."}
                 </p>
               </div>
             </div>
@@ -203,7 +204,7 @@ export function IngestPanel({
             disabled={!ready || loading}
             onClick={() => void analyze()}
           >
-            {loading ? "Analyzing with Groq…" : "Analyze Signals"}
+            {loading ? "Analyzing with AI…" : "Analyze Signals"}
           </Button>
         </CardContent>
       </Card>

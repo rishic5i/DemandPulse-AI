@@ -18,7 +18,7 @@
 - UI components render and gather input only
 - Feature math lives in `src/modules/features`
 - AI I/O lives in `src/providers/ai`
-- Do not call Groq from client components
+- Do not call AI providers from client components
 
 ## Dependencies
 

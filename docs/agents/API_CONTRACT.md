@@ -6,7 +6,7 @@ Full examples: [`../API.md`](../API.md)
 
 ### `GET /api/health`
 
-Returns service status + whether Groq is configured. No secrets.
+Returns service status + whether the configured AI provider is ready. No secrets.
 
 ### `POST /api/analyze`
 

@@ -33,7 +33,7 @@ Husky pre-commit runs:
 ## Rules
 
 - Mock AI in unit/integration tests
-- CI must not require `GROQ_API_KEY`
+- CI must not require `OPENROUTER_API_KEY` or `GROQ_API_KEY`
 - Before claiming done: `pnpm check` and green PR CI (Quality + Security)
 - TypeScript project: ESLint/audit/gitleaks — not Python ruff
 

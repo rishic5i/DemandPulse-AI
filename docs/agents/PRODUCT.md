@@ -11,7 +11,7 @@ Consumer-goods demand is shaped by promotions, competitor moves, preferences, ev
 ## Solution
 
 1. Ingest sales CSV + business notes (CSV or paste)
-2. Extract structured demand/supply signals with Groq
+2. Extract structured demand/supply signals with the configured AI provider
 3. Validate entities against the sales catalog (no guessing)
 4. Generate deterministic numerical features in TypeScript
 5. Explore evidence, export CSV/JSON, serve REST features
@@ -20,7 +20,7 @@ Consumer-goods demand is shaped by promotions, competitor moves, preferences, ev
 
 1. Open app
 2. Click **Run Full Demo**
-3. Wait for live Groq extraction
+3. Wait for live AI extraction
 4. Overview metrics + charts
 5. Signal Explorer → click a signal → show evidence
 6. Feature Store → export CSV/JSON → API preview

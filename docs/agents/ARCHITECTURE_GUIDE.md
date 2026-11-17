@@ -9,7 +9,7 @@ Modular monolith on Next.js App Router.
 ```text
 UI (client state)
   -> POST /api/analyze
-      -> Groq extraction (semantics)
+      -> AI extraction (semantics)
       -> normalize/validate entities
       -> generateFeatures() deterministic math
   -> Overview / Explorer / Feature Store / Export

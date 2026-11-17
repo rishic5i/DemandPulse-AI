@@ -25,6 +25,7 @@
 | Path | Responsibility |
 |---|---|
 | `src/providers/ai/ai-provider.interface.ts` | Provider contract |
+| `src/providers/ai/openrouter.provider.ts` | OpenRouter free-tier fetch + structured outputs |
 | `src/providers/ai/groq.provider.ts` | Groq SDK + structured outputs |
 | `src/providers/ai/provider.factory.ts` | `AI_PROVIDER` factory |
 | `src/providers/ai/ai.types.ts` | Shared AI types / errors |
@@ -55,4 +56,4 @@
 | `docs/agents/SECURITY.md` | Security / audit guidance |
 | `docs/ARCHITECTURE.md` | System architecture |
 | `docs/API.md` | HTTP contract examples |
-| `docs/TECHNICAL_RESEARCH.md` | Groq/hosting decisions |
+| `docs/TECHNICAL_RESEARCH.md` | OpenRouter/Groq/hosting decisions |

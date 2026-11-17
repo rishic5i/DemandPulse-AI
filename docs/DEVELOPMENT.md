@@ -4,14 +4,15 @@
 
 - Node.js 22 (`nvm use` / `.nvmrc`)
 - pnpm 10+
-- Groq API key from https://console.groq.com/keys
+- OpenRouter API key from https://openrouter.ai/keys (free models, no credit card)
+- Optional Groq fallback key from https://console.groq.com/keys
 
 ## Setup
 
 ```bash
 pnpm install
 cp .env.example .env.local
-# set GROQ_API_KEY in .env.local
+# set OPENROUTER_API_KEY in .env.local (or GROQ_API_KEY + AI_PROVIDER=groq)
 pnpm dev
 ```
 
@@ -22,7 +23,9 @@ Husky installs via the `prepare` script during `pnpm install`.
 ## Environment variables
 
 ```env
-AI_PROVIDER=groq
+AI_PROVIDER=openrouter
+OPENROUTER_API_KEY=
+OPENROUTER_MODEL=openrouter/free
 GROQ_API_KEY=
 GROQ_MODEL=openai/gpt-oss-20b
 ```
@@ -58,8 +61,8 @@ Summary: branch → PR → wait for Quality + Security CI → merge. Never push 
 
 ## Testing notes
 
-- Unit tests mock/avoid live Groq calls.
-- CI does not require `GROQ_API_KEY`.
+- Unit tests mock/avoid live AI calls.
+- CI does not require `OPENROUTER_API_KEY` or `GROQ_API_KEY`.
 - Manual AI verification requires a valid key.
 - This is TypeScript: ESLint/audit/gitleaks, not Python ruff.
 

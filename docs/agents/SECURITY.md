@@ -16,7 +16,7 @@ Equivalent gates:
 
 ## Application rules
 
-- `GROQ_API_KEY` is server-only; never `NEXT_PUBLIC_*`
+- `OPENROUTER_API_KEY` / `GROQ_API_KEY` are server-only; never `NEXT_PUBLIC_*`
 - Do not log full uploaded customer payloads
 - Validate all external + AI inputs with Zod
 - Stateless serverless: no durable secret/file storage assumptions

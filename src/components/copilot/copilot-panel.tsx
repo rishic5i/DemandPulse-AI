@@ -84,7 +84,7 @@ export function CopilotPanel({ analysis }: { analysis: AnalysisResult }) {
           className="min-h-24 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-cyan-600/30"
         />
         <Button disabled={loading || !question.trim()} onClick={() => void ask()}>
-          {loading ? "Asking Groq…" : "Ask Copilot"}
+          {loading ? "Asking AI…" : "Ask Copilot"}
         </Button>
         {error && (
           <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
