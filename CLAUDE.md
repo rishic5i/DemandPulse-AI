@@ -29,3 +29,11 @@ pnpm dev
 ## Demo verification
 
 Open the app and click **Run Full Demo**. Confirm Overview → Signal Explorer → Feature Store → Export still works after your change.
+
+## Project skills (`.claude/skills/`)
+
+| Skill | When to use |
+|---|---|
+| `verify-full-demo` | Smoke-test the judge demo path after a change |
+| `safe-feature-pr` | Branch, gates, and open a PR (never push to `main`) |
+| `ai-semantics-only` | Touching prompts, providers, normalize, or feature math |
