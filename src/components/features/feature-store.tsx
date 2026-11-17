@@ -83,21 +83,21 @@ export function FeatureStore({ analysis }: { analysis: AnalysisResult }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-end gap-3">
-            <label className="text-xs text-slate-400">
+            <label className="text-xs text-slate-500">
               SKU
               <input
                 value={sku}
                 onChange={(e) => setSku(e.target.value)}
-                className="mt-1 block rounded-md border border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-slate-100"
+                className="mt-1 block rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
                 placeholder="SKU001"
               />
             </label>
-            <label className="text-xs text-slate-400">
+            <label className="text-xs text-slate-500">
               Retailer
               <input
                 value={retailer}
                 onChange={(e) => setRetailer(e.target.value)}
-                className="mt-1 block rounded-md border border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-slate-100"
+                className="mt-1 block rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
                 placeholder="Retailer A"
               />
             </label>
@@ -114,14 +114,14 @@ export function FeatureStore({ analysis }: { analysis: AnalysisResult }) {
           </div>
 
           {showApi && (
-            <pre className="max-h-64 overflow-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs text-slate-300">
+            <pre className="max-h-64 overflow-auto rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700">
               {JSON.stringify(apiPreview, null, 2)}
             </pre>
           )}
 
-          <div className="overflow-x-auto rounded-lg border border-slate-800">
+          <div className="overflow-x-auto rounded-lg border border-slate-200">
             <table className="min-w-[1100px] text-left text-xs">
-              <thead className="bg-slate-950/80 uppercase text-slate-400">
+              <thead className="bg-slate-100 uppercase text-slate-500">
                 <tr>
                   <th className="px-3 py-2">SKU</th>
                   <th className="px-3 py-2">Retailer</th>
@@ -141,7 +141,7 @@ export function FeatureStore({ analysis }: { analysis: AnalysisResult }) {
                 {features.map((f) => (
                   <tr
                     key={`${f.sku}-${f.retailer}-${f.region}`}
-                    className="border-t border-slate-800/80 text-slate-200"
+                    className="border-t border-slate-200 text-slate-800"
                   >
                     <td className="px-3 py-2">{f.sku}</td>
                     <td className="px-3 py-2">{f.retailer}</td>
@@ -162,7 +162,7 @@ export function FeatureStore({ analysis }: { analysis: AnalysisResult }) {
                     <td className="px-3 py-2">
                       {fmt(f.feature_freshness_hours)}
                     </td>
-                    <td className="px-3 py-2 text-slate-400">
+                    <td className="px-3 py-2 text-slate-500">
                       {f.sourceSignalIds.join(", ") || "—"}
                     </td>
                   </tr>

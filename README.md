@@ -21,7 +21,9 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Demo path: **Run Full Demo → Overview → Signal Explorer → Feature Store → Export**.
+**Live demo:** https://demandpulse-ai.vercel.app
+
+Demo path: **Home → Run Full Demo → Overview charts → Signal Explorer → Feature Store → Export**.
 
 ## Stack
 

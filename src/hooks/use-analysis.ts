@@ -72,7 +72,7 @@ export function useAnalysis() {
   const storedRaw = useSyncExternalStore(subscribe, getStoredRaw, () => null);
   const analysis = parseAnalysis(storedRaw);
 
-  const [view, setView] = useState<AppView>("upload");
+  const [view, setView] = useState<AppView>("home");
   const [sales, setSales] = useState<SalesRow[]>([]);
   const [notes, setNotes] = useState<BusinessNote[]>([]);
   const [salesIssues, setSalesIssues] = useState<string[]>([]);
@@ -156,7 +156,7 @@ export function useAnalysis() {
     setStage("extracting");
     try {
       const result = await runAnalyzeRequest(sales, notes, ingestIsDemo);
-      writeAnalysis(result);
+      writeAnalysis({ ...result, salesSnapshot: sales });
       setHasChosenView(true);
       setView("overview");
       setStage("complete");
@@ -176,7 +176,7 @@ export function useAnalysis() {
       const demo = await loadDemo();
       setStage("extracting");
       const result = await runAnalyzeRequest(demo.sales, demo.notes, true);
-      writeAnalysis(result);
+      writeAnalysis({ ...result, salesSnapshot: demo.sales });
       setHasChosenView(true);
       setView("overview");
       setStage("complete");
@@ -191,7 +191,7 @@ export function useAnalysis() {
   const clearAnalysis = useCallback(() => {
     writeAnalysis(null);
     setHasChosenView(true);
-    setView("upload");
+    setView("home");
     setStage(sales.length > 0 && notes.length > 0 ? "ready" : "idle");
   }, [sales.length, notes.length]);
 
@@ -203,7 +203,9 @@ export function useAnalysis() {
   const ready = sales.length > 0 && notes.length > 0;
   const demoMode = Boolean(analysis?.demoMode);
   const effectiveView =
-    !hasChosenView && analysis && view === "upload" ? "overview" : view;
+    !hasChosenView && analysis && (view === "upload" || view === "home")
+      ? "overview"
+      : view;
   const effectiveStage = analysis && stage === "idle" ? "complete" : stage;
 
   return {

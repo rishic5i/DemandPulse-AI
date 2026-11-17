@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { MarkdownAnswer } from "@/components/copilot/markdown-answer";
 import type { AnalysisResult } from "@/types/domain";
 
 const SUGGESTIONS = [
@@ -66,8 +67,12 @@ export function CopilotPanel({ analysis }: { analysis: AnalysisResult }) {
             <button
               key={item}
               type="button"
-              onClick={() => setQuestion(item)}
-              className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs text-slate-300 hover:border-sky-500/40 hover:text-sky-200"
+              onClick={() => {
+                setQuestion(item);
+                setAnswer(null);
+                setError(null);
+              }}
+              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-700 transition hover:border-cyan-300 hover:bg-cyan-50 hover:text-cyan-900"
             >
               {item}
             </button>
@@ -76,21 +81,17 @@ export function CopilotPanel({ analysis }: { analysis: AnalysisResult }) {
         <textarea
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          className="min-h-24 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:ring-2 focus:ring-sky-500/40"
+          className="min-h-24 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-cyan-600/30"
         />
         <Button disabled={loading || !question.trim()} onClick={() => void ask()}>
           {loading ? "Asking Groq…" : "Ask Copilot"}
         </Button>
         {error && (
-          <p className="rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
+          <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
             {error}
           </p>
         )}
-        {answer && (
-          <div className="rounded-lg border border-slate-800 bg-slate-950/60 px-4 py-3 text-sm leading-relaxed text-slate-200 whitespace-pre-wrap">
-            {answer}
-          </div>
-        )}
+        {answer && <MarkdownAnswer content={answer} />}
       </CardContent>
     </Card>
   );

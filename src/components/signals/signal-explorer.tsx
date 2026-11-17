@@ -88,9 +88,9 @@ export function SignalExplorer({ analysis }: { analysis: AnalysisResult }) {
             />
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-slate-800">
+          <div className="overflow-x-auto rounded-lg border border-slate-200">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-slate-950/80 text-xs uppercase text-slate-400">
+              <thead className="bg-slate-100 text-xs uppercase text-slate-500">
                 <tr>
                   <th className="px-3 py-2">Category</th>
                   <th className="px-3 py-2">SKU</th>
@@ -104,21 +104,21 @@ export function SignalExplorer({ analysis }: { analysis: AnalysisResult }) {
                   <tr
                     key={signal.signalId}
                     onClick={() => setSelectedId(signal.signalId)}
-                    className={`cursor-pointer border-t border-slate-800/80 hover:bg-slate-800/40 ${
+                    className={`cursor-pointer border-t border-slate-200 hover:bg-cyan-50 ${
                       selected?.signalId === signal.signalId
-                        ? "bg-sky-500/10"
+                        ? "bg-cyan-50"
                         : ""
                     }`}
                   >
-                    <td className="px-3 py-2 text-slate-200">{signal.category}</td>
-                    <td className="px-3 py-2 text-slate-300">
+                    <td className="px-3 py-2 text-slate-800">{signal.category}</td>
+                    <td className="px-3 py-2 text-slate-700">
                       {signal.sku ?? "—"}
                     </td>
-                    <td className="px-3 py-2 text-slate-300">{signal.direction}</td>
-                    <td className="px-3 py-2 text-slate-300">
+                    <td className="px-3 py-2 text-slate-700">{signal.direction}</td>
+                    <td className="px-3 py-2 text-slate-700">
                       {(signal.confidence * 100).toFixed(0)}%
                     </td>
-                    <td className="px-3 py-2 text-slate-300">
+                    <td className="px-3 py-2 text-slate-700">
                       {(signal.potentialImpact * 100).toFixed(0)}%
                     </td>
                   </tr>
@@ -126,7 +126,7 @@ export function SignalExplorer({ analysis }: { analysis: AnalysisResult }) {
               </tbody>
             </table>
             {filtered.length === 0 && (
-              <p className="px-3 py-6 text-sm text-slate-400">
+              <p className="px-3 py-6 text-sm text-slate-500">
                 No signals match the current filters.
               </p>
             )}
@@ -151,13 +151,13 @@ function FilterInput({
   placeholder: string;
 }) {
   return (
-    <label className="block text-xs text-slate-400">
+    <label className="block text-xs text-slate-500">
       {label}
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-2 py-1.5 text-sm text-slate-100 outline-none focus:ring-2 focus:ring-sky-500/40"
+        className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-cyan-600/30"
       />
     </label>
   );
@@ -173,7 +173,7 @@ function SignalDetail({
   if (!signal) {
     return (
       <Card>
-        <CardContent className="pt-6 text-sm text-slate-400">
+        <CardContent className="pt-6 text-sm text-slate-500">
           Select a signal to inspect evidence and lineage.
         </CardContent>
       </Card>
@@ -193,8 +193,8 @@ function SignalDetail({
           <Badge
             className={
               signal.isSupplyRisk
-                ? "border-rose-500/40 text-rose-200"
-                : "border-emerald-500/40 text-emerald-200"
+                ? "border-rose-200 bg-rose-50 text-rose-800"
+                : "border-emerald-200 bg-emerald-50 text-emerald-800"
             }
           >
             {signal.isSupplyRisk ? "Supply risk" : "Demand"}
@@ -221,7 +221,7 @@ function SignalDetail({
         </div>
 
         <div>
-          <p className="mb-2 text-xs uppercase tracking-wide text-slate-400">
+          <p className="mb-2 text-xs uppercase tracking-wide text-slate-500">
             Associated features
           </p>
           {features.length === 0 ? (
@@ -233,7 +233,7 @@ function SignalDetail({
               {features.map((f) => (
                 <li
                   key={`${f.sku}-${f.retailer}-${f.region}`}
-                  className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2 text-xs text-slate-300"
+                  className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700"
                 >
                   {f.sku} · {f.retailer} · {f.region} · net{" "}
                   {f.net_demand_signal ?? "null"} · supply{" "}
@@ -251,10 +251,10 @@ function SignalDetail({
 function Section({ title, body }: { title: string; body: string }) {
   return (
     <div>
-      <p className="mb-1 text-xs uppercase tracking-wide text-slate-400">
+      <p className="mb-1 text-xs uppercase tracking-wide text-slate-500">
         {title}
       </p>
-      <p className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2 text-slate-200">
+      <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800">
         {body}
       </p>
     </div>
@@ -263,9 +263,9 @@ function Section({ title, body }: { title: string; body: string }) {
 
 function KV({ label, value }: { label: string; value: string | null }) {
   return (
-    <div className="rounded-md border border-slate-800 bg-slate-950/40 px-3 py-2">
+    <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
       <p className="text-[11px] uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 text-slate-200">{value ?? "unresolved"}</p>
+      <p className="mt-1 text-slate-800">{value ?? "unresolved"}</p>
     </div>
   );
 }

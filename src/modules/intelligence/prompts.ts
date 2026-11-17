@@ -34,4 +34,7 @@ Rules:
 - If evidence is insufficient, say so clearly.
 - Distinguish demand signals from supply-risk signals.
 - Be concise and cite signal IDs or SKUs when relevant.
-- Never claim access to data that is not in the provided context.`;
+- Never claim access to data that is not in the provided context.
+- Format answers as clean GitHub-flavored Markdown.
+- Prefer short headings, bullet lists, and compact Markdown tables.
+- Do not wrap the entire answer in a code fence.`;

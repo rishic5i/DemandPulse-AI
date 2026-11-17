@@ -54,7 +54,7 @@ export function IngestPanel({
     <div className="space-y-6">
       <PipelineStatus stage={stage} />
 
-      <Card className="border-sky-500/20 bg-gradient-to-br from-slate-900/90 to-slate-950/90">
+      <Card className="border-cyan-200 bg-gradient-to-br from-cyan-50/80 to-white">
         <CardHeader>
           <CardTitle>Hackathon demo — one click</CardTitle>
           <CardDescription>
@@ -76,7 +76,7 @@ export function IngestPanel({
             Load demo data only
           </Button>
           {aiConfigured === false && (
-            <p className="text-sm text-amber-200">
+            <p className="text-sm text-amber-800">
               Groq key missing — set GROQ_API_KEY in .env.local before analyzing.
             </p>
           )}
@@ -106,29 +106,29 @@ export function IngestPanel({
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <label className="block rounded-xl border border-dashed border-slate-700 bg-slate-950/40 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-200">
-                <FileSpreadsheet className="h-4 w-4 text-sky-300" />
+            <label className="block rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-800">
+                <FileSpreadsheet className="h-4 w-4 text-cyan-700" />
                 Historical sales CSV
               </div>
-              <p className="mb-3 text-xs text-slate-400">
+              <p className="mb-3 text-xs text-slate-500">
                 Required: date, sku, product_name, retailer, region, units_sold,
                 revenue
               </p>
               <input
                 type="file"
                 accept=".csv,text/csv"
-                className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-slate-100"
+                className="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-1.5 file:text-slate-800 file:shadow-sm"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) void onSalesFile(file);
                 }}
               />
-              <p className="mt-3 text-xs text-emerald-300">
+              <p className="mt-3 text-xs text-emerald-700">
                 {sales.length} sales rows loaded
               </p>
               {salesIssues.length > 0 && (
-                <ul className="mt-2 space-y-1 text-xs text-rose-300">
+                <ul className="mt-2 space-y-1 text-xs text-rose-700">
                   {salesIssues.slice(0, 5).map((issue) => (
                     <li key={issue}>{issue}</li>
                   ))}
@@ -136,28 +136,28 @@ export function IngestPanel({
               )}
             </label>
 
-            <label className="block rounded-xl border border-dashed border-slate-700 bg-slate-950/40 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-200">
-                <FileSpreadsheet className="h-4 w-4 text-sky-300" />
+            <label className="block rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-800">
+                <FileSpreadsheet className="h-4 w-4 text-cyan-700" />
                 Business notes CSV
               </div>
-              <p className="mb-3 text-xs text-slate-400">
+              <p className="mb-3 text-xs text-slate-500">
                 Required: date, note. Optional: retailer, region, id
               </p>
               <input
                 type="file"
                 accept=".csv,text/csv"
-                className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-slate-100"
+                className="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-1.5 file:text-slate-800 file:shadow-sm"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) void onNotesFile(file);
                 }}
               />
-              <p className="mt-3 text-xs text-emerald-300">
+              <p className="mt-3 text-xs text-emerald-700">
                 {notes.length} notes loaded
               </p>
               {notesIssues.length > 0 && (
-                <ul className="mt-2 space-y-1 text-xs text-rose-300">
+                <ul className="mt-2 space-y-1 text-xs text-rose-700">
                   {notesIssues.slice(0, 5).map((issue) => (
                     <li key={issue}>{issue}</li>
                   ))}
@@ -166,15 +166,15 @@ export function IngestPanel({
             </label>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-            <p className="mb-2 text-sm font-medium text-slate-200">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p className="mb-2 text-sm font-medium text-slate-800">
               Or paste notes directly
             </p>
             <textarea
               value={pastedNotes}
               onChange={(e) => setPastedNotes(e.target.value)}
               placeholder="Paste retailer commentary, one note per line or CSV with date,note columns…"
-              className="min-h-28 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none ring-sky-500/40 placeholder:text-slate-500 focus:ring-2"
+              className="min-h-28 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-cyan-600/30"
             />
             <div className="mt-3">
               <Button type="button" variant="secondary" onClick={applyPastedNotes}>
@@ -184,12 +184,12 @@ export function IngestPanel({
           </div>
 
           {error && (
-            <div className="flex items-start gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
+            <div className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <div>
                 <p className="font-medium">Live AI analysis failed</p>
-                <p className="text-rose-200/90">{error}</p>
-                <p className="mt-1 text-xs text-rose-200/70">
+                <p>{error}</p>
+                <p className="mt-1 text-xs text-rose-700/80">
                   Configure GROQ_API_KEY in .env.local. Mock results are never
                   substituted silently.
                 </p>

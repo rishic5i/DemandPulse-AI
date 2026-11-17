@@ -45,10 +45,10 @@ export function WorkflowNext({
         {NEXT.map((item) => (
           <div
             key={item.view}
-            className="rounded-lg border border-slate-800 bg-slate-950/50 p-4"
+            className="rounded-xl border border-slate-200 bg-slate-50 p-4"
           >
-            <p className="text-sm font-medium text-slate-100">{item.title}</p>
-            <p className="mt-1 text-xs text-slate-400">{item.body}</p>
+            <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+            <p className="mt-1 text-xs text-slate-500">{item.body}</p>
             <Button
               className="mt-3"
               size="sm"

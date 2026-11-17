@@ -13,16 +13,14 @@ const STEPS = [
 function activeIndex(stage: PipelineStage): number {
   switch (stage) {
     case "idle":
-      return 0;
     case "loading_demo":
     case "ready":
       return 0;
     case "extracting":
+    case "error":
       return 1;
     case "complete":
       return 3;
-    case "error":
-      return 1;
     default:
       return 0;
   }
@@ -32,9 +30,9 @@ export function PipelineStatus({ stage }: { stage: PipelineStage }) {
   const current = activeIndex(stage);
 
   return (
-    <div className="mb-4 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3">
+    <div className="mb-4 rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           End-to-end pipeline
         </p>
         <p className="text-xs text-slate-500">
@@ -54,10 +52,10 @@ export function PipelineStatus({ stage }: { stage: PipelineStage }) {
             <li
               key={step.id}
               className={cn(
-                "rounded-lg border px-3 py-2 text-xs",
-                done && "border-emerald-500/40 bg-emerald-500/10 text-emerald-200",
-                active && "border-sky-500/40 bg-sky-500/10 text-sky-200",
-                !done && !active && "border-slate-800 text-slate-500",
+                "rounded-xl border px-3 py-2 text-xs font-medium",
+                done && "border-emerald-200 bg-emerald-50 text-emerald-800",
+                active && "border-cyan-200 bg-cyan-50 text-cyan-900",
+                !done && !active && "border-slate-200 bg-slate-50 text-slate-500",
               )}
             >
               {step.label}

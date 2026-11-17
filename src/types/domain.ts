@@ -81,9 +81,16 @@ export interface AnalysisResult {
   noteCount: number;
   signals: DemandSignal[];
   features: FeatureRecord[];
+  salesSnapshot?: SalesRow[];
   provider: string;
   model: string;
   warnings: string[];
 }
 
-export type AppView = "overview" | "signals" | "features" | "copilot" | "upload";
+export type AppView =
+  | "home"
+  | "overview"
+  | "signals"
+  | "features"
+  | "copilot"
+  | "upload";
