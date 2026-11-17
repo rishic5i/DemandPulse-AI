@@ -56,16 +56,23 @@ async function runAnalyzeRequest(
   notes: BusinessNote[],
   demoMode: boolean,
 ): Promise<AnalysisResult> {
-  const response = await fetch("/api/analyze", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ sales, notes, demoMode }),
-  });
-  const payload = await response.json();
-  if (!response.ok) {
-    throw new Error(payload?.error?.message || "Analysis failed");
+  // Demo dataset is sized for one Groq call path — keep the UI path simple and fast.
+  let lastMessage = "Analysis failed";
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sales, notes, demoMode }),
+    });
+    const payload = await response.json();
+    if (response.ok) {
+      return payload.analysis as AnalysisResult;
+    }
+    lastMessage = payload?.error?.message || "Analysis failed";
+    if (response.status !== 429 || attempt === 1) break;
+    await new Promise((r) => setTimeout(r, 1500));
   }
-  return payload.analysis as AnalysisResult;
+  throw new Error(lastMessage);
 }
 
 export function useAnalysis() {

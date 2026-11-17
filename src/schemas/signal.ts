@@ -27,10 +27,10 @@ export const extractedSignalSchema = z.object({
   category: signalCategorySchema,
   description: z.string().min(1),
   direction: signalDirectionSchema,
-  confidence: z.number().min(0).max(1),
-  potentialImpact: z.number().min(0).max(1),
-  startDate: z.string().nullable(),
-  endDate: z.string().nullable(),
+  confidence: z.coerce.number().min(0).max(1),
+  potentialImpact: z.coerce.number().min(0).max(1),
+  startDate: z.union([z.string(), z.null()]).catch(null),
+  endDate: z.union([z.string(), z.null()]).catch(null),
   evidence: z.string().min(1),
   explanation: z.string().min(1),
 });
@@ -57,11 +57,25 @@ export const businessNoteSchema = z.object({
   note: z.string().min(1),
 });
 
-export const analyzeRequestSchema = z.object({
-  sales: z.array(salesRowSchema).max(5000),
-  notes: z.array(businessNoteSchema).min(1).max(200),
-  demoMode: z.boolean().optional().default(false),
-});
+export const analyzeRequestSchema = z
+  .object({
+    sales: z.array(salesRowSchema).max(5000),
+    notes: z.array(businessNoteSchema).max(200).optional(),
+    /** Skip AI and compose features from already-extracted semantic signals. */
+    extractedSignals: z.array(extractedSignalSchema).max(500).optional(),
+    demoMode: z.boolean().optional().default(false),
+  })
+  .superRefine((value, ctx) => {
+    const noteCount = value.notes?.length ?? 0;
+    const signalCount = value.extractedSignals?.length ?? 0;
+    if (noteCount === 0 && signalCount === 0) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Provide notes and/or extractedSignals",
+        path: ["notes"],
+      });
+    }
+  });
 
 export const assistantRequestSchema = z.object({
   question: z.string().min(1).max(1000),

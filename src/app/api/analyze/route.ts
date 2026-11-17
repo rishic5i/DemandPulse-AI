@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { sales, notes, demoMode } = parsed.data;
+  const { sales, notes, extractedSignals, demoMode } = parsed.data;
   if (sales.length === 0) {
     return jsonError(
       400,
@@ -42,18 +42,27 @@ export async function POST(request: Request) {
   }
 
   try {
-    const provider = createAiProvider();
-    const extracted = await provider.extractSignals({
-      notes,
-      salesContext: sales.map((row) => ({
-        sku: row.sku,
-        product_name: row.product_name,
-        retailer: row.retailer,
-        region: row.region,
-      })),
-    });
+    let providerName = "compose";
+    let modelName = "deterministic";
+    let rawSignals = extractedSignals ?? [];
 
-    const signals = validateAndNormalizeSignals(extracted.signals, sales);
+    if ((notes?.length ?? 0) > 0) {
+      const provider = createAiProvider();
+      const extracted = await provider.extractSignals({
+        notes: notes!,
+        salesContext: sales.map((row) => ({
+          sku: row.sku,
+          product_name: row.product_name,
+          retailer: row.retailer,
+          region: row.region,
+        })),
+      });
+      rawSignals = [...rawSignals, ...extracted.signals];
+      providerName = extracted.provider;
+      modelName = extracted.model;
+    }
+
+    const signals = validateAndNormalizeSignals(rawSignals, sales);
     const features = generateFeatures(signals, sales);
 
     const result: AnalysisResult = {
@@ -61,11 +70,11 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
       demoMode: Boolean(demoMode),
       salesRowCount: sales.length,
-      noteCount: notes.length,
+      noteCount: notes?.length ?? 0,
       signals,
       features,
-      provider: extracted.provider,
-      model: extracted.model,
+      provider: providerName,
+      model: modelName,
       warnings: [
         "Server storage is best-effort only. Keep this response client-side for dashboard/export use.",
         ...(signals.some((s) => s.validationStatus !== "VALID")

@@ -5,9 +5,9 @@ export async function GET() {
   const requestId = createRequestId();
   let providerName = process.env.AI_PROVIDER || "groq";
   let model =
-    process.env.OPENROUTER_MODEL ||
     process.env.GROQ_MODEL ||
-    "openai/gpt-oss-20b";
+    process.env.OPENROUTER_MODEL ||
+    "qwen/qwen3.8-27b";
   let configured = false;
 
   try {

@@ -28,12 +28,13 @@ Consumer-goods demand is shaped by promotions, competitor moves, preferences, ev
 
 ## Demo dataset coverage
 
-`public/demo/sales.csv` + `public/demo/business-notes.csv` are synthetic and intentionally broad:
+`public/demo/sales.csv` + `public/demo/business-notes.csv` are synthetic, compact (~18 sales / ~10 notes), and diverse enough for a fast Groq free-tier Full Demo:
 
 - SKUs: Premium/Herbal shampoo, conditioner, kids wash, anti-dandruff serum
 - Retailers A–D and regions North/South/West/East
-- Signal cases: demand up/down, promotion, competitor, seasonality, preference, supply disruption, ambiguous/unknown, neutral/no-impact
+- Signal cases: competitor, preference, seasonality, supply disruption, promotion, demand down, demand up
 - Feature edge case: SKU005 mostly sales-only context (sparse commentary)
+
 
 ## Explicit non-goals (MVP)
 

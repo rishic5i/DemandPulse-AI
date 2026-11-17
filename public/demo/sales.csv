@@ -1,47 +1,19 @@
 date,sku,product_name,retailer,region,units_sold,revenue
 2026-01-01,SKU001,Premium Shampoo,Retailer A,North,120,2400
-2026-01-02,SKU001,Premium Shampoo,Retailer A,North,135,2700
 2026-01-03,SKU001,Premium Shampoo,Retailer A,North,128,2560
-2026-01-04,SKU002,Herbal Shampoo,Retailer A,North,80,1600
 2026-01-05,SKU002,Herbal Shampoo,Retailer A,North,95,1900
 2026-01-06,SKU001,Premium Shampoo,Retailer B,South,110,2200
 2026-01-07,SKU003,Daily Conditioner,Retailer B,South,70,1400
-2026-01-08,SKU003,Daily Conditioner,Retailer B,South,74,1480
 2026-01-09,SKU002,Herbal Shampoo,Retailer B,South,60,1200
 2026-01-10,SKU001,Premium Shampoo,Retailer A,North,142,2840
 2026-01-11,SKU004,Kids Body Wash,Retailer C,West,55,990
-2026-01-12,SKU004,Kids Body Wash,Retailer C,West,58,1044
-2026-01-13,SKU003,Daily Conditioner,Retailer A,North,66,1320
 2026-01-14,SKU002,Herbal Shampoo,Retailer A,North,101,2020
 2026-01-15,SKU001,Premium Shampoo,Retailer B,South,118,2360
 2026-01-16,SKU005,Anti Dandruff Serum,Retailer D,East,40,1200
-2026-01-17,SKU005,Anti Dandruff Serum,Retailer D,East,42,1260
-2026-01-18,SKU001,Premium Shampoo,Retailer A,North,150,3000
-2026-01-18,SKU002,Herbal Shampoo,Retailer A,North,110,2200
 2026-01-18,SKU003,Daily Conditioner,Retailer B,South,88,1760
-2026-01-19,SKU004,Kids Body Wash,Retailer C,West,61,1098
-2026-01-19,SKU005,Anti Dandruff Serum,Retailer D,East,41,1230
 2026-01-20,SKU001,Premium Shampoo,Retailer C,West,90,1800
-2026-01-20,SKU002,Herbal Shampoo,Retailer B,South,72,1440
-2026-01-21,SKU003,Daily Conditioner,Retailer A,North,79,1580
-2026-01-21,SKU004,Kids Body Wash,Retailer A,North,48,864
-2026-01-22,SKU001,Premium Shampoo,Retailer B,South,125,2500
-2026-01-22,SKU005,Anti Dandruff Serum,Retailer D,East,39,1170
-2026-01-23,SKU002,Herbal Shampoo,Retailer C,West,68,1360
 2026-01-23,SKU003,Daily Conditioner,Retailer B,South,95,1900
-2026-01-24,SKU001,Premium Shampoo,Retailer A,North,138,2760
-2026-01-24,SKU004,Kids Body Wash,Retailer C,West,52,936
 2026-01-25,SKU002,Herbal Shampoo,Retailer A,North,118,2360
-2026-01-25,SKU005,Anti Dandruff Serum,Retailer D,East,43,1290
-2026-01-26,SKU003,Daily Conditioner,Retailer D,East,57,1140
-2026-01-26,SKU001,Premium Shampoo,Retailer C,West,84,1680
-2026-01-27,SKU002,Herbal Shampoo,Retailer B,South,77,1540
-2026-01-27,SKU004,Kids Body Wash,Retailer A,North,50,900
 2026-01-28,SKU001,Premium Shampoo,Retailer A,North,146,2920
-2026-01-28,SKU003,Daily Conditioner,Retailer B,South,102,2040
 2026-01-29,SKU005,Anti Dandruff Serum,Retailer D,East,44,1320
-2026-01-29,SKU002,Herbal Shampoo,Retailer A,North,121,2420
 2026-01-30,SKU004,Kids Body Wash,Retailer C,West,59,1062
-2026-01-30,SKU001,Premium Shampoo,Retailer B,South,130,2600
-2026-01-31,SKU003,Daily Conditioner,Retailer A,North,81,1620
-2026-01-31,SKU005,Anti Dandruff Serum,Retailer D,East,45,1350

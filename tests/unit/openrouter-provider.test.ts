@@ -56,6 +56,41 @@ describe("mapOpenRouterError", () => {
   });
 });
 
+describe("OpenRouter non-JSON upstream body", () => {
+  const originalKey = process.env.OPENROUTER_API_KEY;
+
+  afterEach(() => {
+    process.env.OPENROUTER_API_KEY = originalKey;
+    vi.unstubAllGlobals();
+  });
+
+  it("treats HTML/gateway bodies as retryable then fails cleanly", async () => {
+    process.env.OPENROUTER_API_KEY = "sk-or-test";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response("<html>Bad Gateway</html>", {
+          status: 502,
+          headers: { "Content-Type": "text/html" },
+        }),
+      ),
+    );
+
+    const provider = new OpenRouterProvider("openrouter/free");
+    await expect(
+      provider.answerQuestion({
+        question: "What is demand?",
+        signalsSummary: "[]",
+        featuresSummary: "[]",
+      }),
+    ).rejects.toMatchObject({
+      code: "PROVIDER_ERROR",
+      retryable: true,
+      status: 502,
+    });
+  });
+});
+
 describe("createAiProvider factory", () => {
   const originalProvider = process.env.AI_PROVIDER;
   const originalOrKey = process.env.OPENROUTER_API_KEY;
