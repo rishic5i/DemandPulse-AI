@@ -1,0 +1,15 @@
+---
+description: DemandPulse AI project standards
+globs:
+alwaysApply: true
+---
+
+Follow `AGENTS.md` as the canonical engineering guide.
+
+Key constraints:
+- Next.js App Router + TypeScript + pnpm only
+- Groq is the AI provider; never expose API keys to the client
+- LLM extracts signals; TypeScript calculates features
+- No silent AI mocks on failure
+- Keep demand and supply-risk features separate
+- Prefer extending existing modules; avoid unnecessary dependencies

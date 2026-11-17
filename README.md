@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DemandPulse AI
 
-## Getting Started
+Turn hidden business signals into intelligent demand features.
 
-First, run the development server:
+C5i Hackathon MVP — Consumer Goods Demand Signal Feature Service.
+
+## What it does
+
+1. Ingest historical sales CSV + unstructured business notes
+2. Extract demand/supply events with Groq
+3. Validate entities (no guessing)
+4. Calculate deterministic forecasting features in TypeScript
+5. Explore evidence, export CSV/JSON, and query via REST API
+
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local
+# add GROQ_API_KEY
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Demo path: **Try Demo → Analyze Signals → Signal Explorer → Feature Store → Export**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Next.js App Router · TypeScript · pnpm · Tailwind · Zod · PapaParse · Recharts · Vitest · Groq (`openai/gpt-oss-20b`)
 
-## Learn More
+## API
 
-To learn more about Next.js, take a look at the following resources:
+- `GET /api/health`
+- `POST /api/analyze`
+- `GET /api/features?runId=...`
+- `POST /api/assistant`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+See [docs/API.md](docs/API.md).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Testing
 
-## Deploy on Vercel
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Cursor / Claude Code
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Both tools follow the same canonical instructions in [`AGENTS.md`](./AGENTS.md).
+
+- Cursor: `.cursor/rules` references `AGENTS.md`
+- Claude Code: [`CLAUDE.md`](./CLAUDE.md) points to `AGENTS.md`
+
+No tool-specific runtime dependency is required to build or run the app.
+
+## Environment
+
+```env
+AI_PROVIDER=groq
+GROQ_API_KEY=
+GROQ_MODEL=openai/gpt-oss-20b
+```
+
+## Known limitations
+
+- Stateless deployment: durable server storage is not included; UI keeps analysis in `sessionStorage`
+- Free-tier Groq rate limits apply (see `docs/TECHNICAL_RESEARCH.md`)
+- Demo CSVs are synthetic and labeled as such
+- Forecast evaluation module intentionally deferred
+
+## Docs
+
+- [Technical research](docs/TECHNICAL_RESEARCH.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [API](docs/API.md)
+- [Development](docs/DEVELOPMENT.md)
