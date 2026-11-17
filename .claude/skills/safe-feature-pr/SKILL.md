@@ -20,10 +20,15 @@ description: Create a feature branch, run quality gates, and open a PR for Deman
 4. Run `pnpm check` (lint + typecheck + test + audit + build).
 5. Push branch: `git push -u origin HEAD`.
 6. Open PR with `gh pr create` — include Summary + Test plan.
-7. Wait for **Quality** + **Security** CI green before merge.
+7. Wait for **Quality** + **Security** CI green (`gh pr checks`).
+8. When the user asks to merge (or after green checks as standard ship):  
+   `gh pr merge <n> --merge --delete-branch`  
+   Then `git checkout main && git pull origin main` and prune the local feature branch if it remains.
+9. Confirm the remote feature branch is gone.
 
 ## Test plan minimum
 
 - [ ] `pnpm check` locally
 - [ ] Run Full Demo still works
 - [ ] No secrets in diff
+- [ ] After merge: remote `feature/...` branch deleted
