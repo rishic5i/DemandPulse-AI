@@ -48,7 +48,11 @@
 | `AGENTS.md` | Canonical shared agent rules |
 | `CLAUDE.md` | Claude Code pointer |
 | `.cursor/rules/*.mdc` | Cursor scoped rules |
+| `.husky/pre-commit` | Local quality gates |
+| `.github/workflows/ci.yml` | Quality + Security CI |
 | `docs/agents/*` | Deep references for agents |
+| `docs/agents/GIT_WORKFLOW.md` | Mandatory PR workflow |
+| `docs/agents/SECURITY.md` | Security / audit guidance |
 | `docs/ARCHITECTURE.md` | System architecture |
 | `docs/API.md` | HTTP contract examples |
 | `docs/TECHNICAL_RESEARCH.md` | Groq/hosting decisions |

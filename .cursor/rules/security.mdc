@@ -1,0 +1,12 @@
+---
+description: Security and dependency safety rules
+globs: "**/*.{ts,tsx,js,mjs,yml,yaml,md,env*}"
+alwaysApply: false
+---
+
+Read `docs/agents/SECURITY.md` when touching auth, env, CI, or dependencies.
+
+- Keep `GROQ_API_KEY` server-side only
+- Run `pnpm security:audit` for dependency changes
+- Do not add secret values to tracked files
+- This is TypeScript — use ESLint/audit/gitleaks, not Python ruff

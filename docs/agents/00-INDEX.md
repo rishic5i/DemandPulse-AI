@@ -21,6 +21,8 @@ Use this folder when building or extending DemandPulse AI with **Cursor** or **C
 | Change REST routes | [`API_CONTRACT.md`](API_CONTRACT.md), [`../API.md`](../API.md) |
 | Change UI / demo flow | [`UI_GUIDE.md`](UI_GUIDE.md) |
 | Add tests / run quality gates | [`TESTING.md`](TESTING.md) |
+| Commit / push / PR | [`GIT_WORKFLOW.md`](GIT_WORKFLOW.md) |
+| Security / audits / secrets | [`SECURITY.md`](SECURITY.md) |
 | Implement a new feature safely | [`BUILD_PLAYBOOK.md`](BUILD_PLAYBOOK.md) |
 | Coding conventions | [`CODING_STANDARDS.md`](CODING_STANDARDS.md) |
 
@@ -32,3 +34,4 @@ Use this folder when building or extending DemandPulse AI with **Cursor** or **C
 4. Keep demand features separate from supply-risk features.
 5. Secrets stay server-side (`GROQ_API_KEY`, never `NEXT_PUBLIC_*`).
 6. Use `pnpm` only.
+7. Never push directly to `main` — PR + green Quality/Security CI required.

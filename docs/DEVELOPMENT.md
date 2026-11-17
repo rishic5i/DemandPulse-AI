@@ -17,6 +17,8 @@ pnpm dev
 
 Open http://localhost:3000
 
+Husky installs via the `prepare` script during `pnpm install`.
+
 ## Environment variables
 
 ```env
@@ -32,23 +34,41 @@ pnpm dev
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm security:audit
 pnpm build
+pnpm check
 pnpm start
 ```
+
+## Pre-commit hooks
+
+Husky runs on every commit:
+
+1. lint-staged → ESLint on staged JS/TS files
+2. `pnpm typecheck`
+3. `pnpm test`
+
+Do not use `--no-verify` unless explicitly required.
+
+## Git / PR process
+
+See [`docs/agents/GIT_WORKFLOW.md`](agents/GIT_WORKFLOW.md).
+
+Summary: branch → PR → wait for Quality + Security CI → merge. Never push features directly to `main`.
 
 ## Testing notes
 
 - Unit tests mock/avoid live Groq calls.
 - CI does not require `GROQ_API_KEY`.
 - Manual AI verification requires a valid key.
+- This is TypeScript: ESLint/audit/gitleaks, not Python ruff.
 
 ## Deployment
 
-1. Push to GitHub.
-2. Import the repo in Vercel.
-3. Set env vars in the Vercel project.
-4. Deploy.
-5. Verify `/api/health` and the demo flow.
+1. Merge PR to `main` after green CI.
+2. Vercel production deploys from `main`.
+3. Confirm env vars in Vercel.
+4. Verify `/api/health` and the demo flow.
 
 ## Agent workflows
 

@@ -38,14 +38,21 @@ Next.js App Router · TypeScript · pnpm · Tailwind · Zod · PapaParse · Rech
 
 See [docs/API.md](docs/API.md).
 
-## Testing
+## Testing & quality gates
 
 ```bash
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm build
+pnpm check          # lint + typecheck + test + audit + build
+pnpm security:audit
 ```
+
+Pre-commit (Husky): lint-staged → typecheck → unit tests.
+
+CI on every PR:
+
+- **Quality** — lint, typecheck, test, build
+- **Security** — dependency audit, Gitleaks, secret-pattern guard
+
+Never push feature work directly to `main`. See [`docs/agents/GIT_WORKFLOW.md`](docs/agents/GIT_WORKFLOW.md).
 
 ## Cursor / Claude Code (hackathon agent setup)
 
