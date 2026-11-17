@@ -18,7 +18,11 @@ export const metadata: Metadata = {
     "Turn hidden business signals into intelligent demand features for consumer goods forecasting.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html
       lang="en"
