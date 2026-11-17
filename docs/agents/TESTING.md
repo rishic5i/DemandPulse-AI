@@ -7,8 +7,18 @@ pnpm test
 pnpm test:watch
 pnpm lint
 pnpm typecheck
+pnpm security:audit
 pnpm build
+pnpm check
 ```
+
+## Local hooks
+
+Husky pre-commit runs:
+
+1. lint-staged (ESLint on staged JS/TS)
+2. typecheck
+3. unit tests
 
 ## Required coverage areas
 
@@ -24,7 +34,8 @@ pnpm build
 
 - Mock AI in unit/integration tests
 - CI must not require `GROQ_API_KEY`
-- Before claiming done: lint + typecheck + test + build
+- Before claiming done: `pnpm check` and green PR CI (Quality + Security)
+- TypeScript project: ESLint/audit/gitleaks — not Python ruff
 
 ## Manual E2E checklist
 

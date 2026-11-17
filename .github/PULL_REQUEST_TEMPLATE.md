@@ -2,11 +2,12 @@
 -
 
 ## Test plan
-- [ ] `pnpm lint`
-- [ ] `pnpm typecheck`
-- [ ] `pnpm test`
-- [ ] `pnpm build`
-- [ ] Manual demo flow (Try Demo → Analyze Signals)
+- [ ] `pnpm check` (lint + typecheck + test + audit + build)
+- [ ] Manual demo flow (Home → Run Full Demo → Explorer → Feature Store)
+- [ ] CI Quality job green
+- [ ] CI Security job green
 
 ## Notes
--
+- Do not merge until both CI jobs pass.
+- No direct commits to `main`.
+

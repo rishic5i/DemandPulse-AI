@@ -28,6 +28,8 @@ Next.js App Router · TypeScript · pnpm · Tailwind · Zod · PapaParse · Rech
 | Product / demo path | `docs/agents/PRODUCT.md` |
 | File locations | `docs/agents/FILE_MAP.md` |
 | Implement a change | `docs/agents/BUILD_PLAYBOOK.md` |
+| Git / PR workflow | `docs/agents/GIT_WORKFLOW.md` |
+| Security gates | `docs/agents/SECURITY.md` |
 | Coding rules | `docs/agents/CODING_STANDARDS.md` |
 | Groq / prompts | `docs/agents/AI_PROVIDER.md` |
 | REST contracts | `docs/agents/API_CONTRACT.md` |
@@ -45,15 +47,34 @@ Next.js App Router · TypeScript · pnpm · Tailwind · Zod · PapaParse · Rech
 5. Secrets stay server-side (`GROQ_API_KEY` only — never `NEXT_PUBLIC_*`).
 6. Assume serverless: no durable server memory/filesystem.
 7. Package manager is **pnpm** only.
+8. **Never push directly to `main`.** Use `feature/...` + PR + green CI (Quality + Security).
+9. Never skip git hooks (`--no-verify`) unless the user explicitly requests it.
 
 ## Working loop
 
-1. `git status` + read relevant `docs/agents/*` files
-2. Prefer extending existing modules over rewrites
-3. Keep prompts in `src/modules/intelligence/prompts.ts`
-4. Keep feature math in `src/modules/features/generate.ts`
-5. Before finish: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`
-6. Manual smoke: **Run Full Demo** → Explorer → Feature Store → Export
+1. Branch from updated `main` into `feature/<name>`
+2. `git status` + read relevant `docs/agents/*` files
+3. Prefer extending existing modules over rewrites
+4. Keep prompts in `src/modules/intelligence/prompts.ts`
+5. Keep feature math in `src/modules/features/generate.ts`
+6. Before finish: `pnpm check` (lint + typecheck + test + audit + build)
+7. Push branch, open PR, wait for CI green, then merge
+8. Manual smoke: **Run Full Demo** → Explorer → Feature Store → Export
+
+## Quality & security gates
+
+Local pre-commit (Husky):
+
+- lint-staged (ESLint on staged JS/TS)
+- `pnpm typecheck`
+- `pnpm test`
+
+CI on every PR:
+
+- Quality: lint, typecheck, test, build
+- Security: `pnpm audit --audit-level=high`, Gitleaks, secret-pattern guard
+
+Note: this is a TypeScript repo. Use ESLint/audit/gitleaks — not Python `ruff`.
 
 ## Cursor vs Claude Code
 

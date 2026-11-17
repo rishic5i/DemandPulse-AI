@@ -4,16 +4,26 @@ Read and follow these files in order:
 
 1. [`AGENTS.md`](./AGENTS.md) — canonical shared rules (always)
 2. [`docs/agents/00-INDEX.md`](./docs/agents/00-INDEX.md) — task → document map
-3. Open the specific `docs/agents/*.md` file that matches your task
+3. [`docs/agents/GIT_WORKFLOW.md`](./docs/agents/GIT_WORKFLOW.md) before any commit/push
+4. Open the specific `docs/agents/*.md` file that matches your task
 
 Do not duplicate long standards in this file. Keep Claude Code and Cursor aligned through the shared docs above.
+
+## Mandatory delivery rule
+
+Never push feature commits directly to `main`. Always:
+
+1. create `feature/...`
+2. open a PR
+3. wait for Quality + Security checks
+4. merge only when green
 
 ## Quick commands
 
 ```bash
 pnpm install
+pnpm check
 pnpm dev
-pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
 ## Demo verification

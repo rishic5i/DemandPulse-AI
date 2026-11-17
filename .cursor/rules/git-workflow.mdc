@@ -1,0 +1,13 @@
+---
+description: Mandatory PR workflow — never push directly to main
+alwaysApply: true
+---
+
+Read `docs/agents/GIT_WORKFLOW.md` before committing or pushing.
+
+Hard rules:
+- Never push feature work directly to `main`
+- Always use `feature/...` branches + pull requests
+- Wait for Quality + Security CI checks to pass before merge
+- Never skip hooks with `--no-verify` unless the user explicitly asks
+- Never commit `.env`, `.env.local`, or API keys
