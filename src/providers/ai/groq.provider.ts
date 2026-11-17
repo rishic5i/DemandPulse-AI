@@ -76,17 +76,37 @@ const EXTRACTION_JSON_SCHEMA = {
   },
 } as const;
 
+/** Strict JSON schema batches larger than this often fail on gpt-oss-20b. */
+const DEFAULT_BATCH_SIZE = 3;
+
+function getErrorMessage(error: unknown): string {
+  const err = error as {
+    message?: string;
+    error?: { message?: string; code?: string };
+  };
+  return err.error?.message || err.message || "Groq provider request failed";
+}
+
+function getErrorCode(error: unknown): string | undefined {
+  const err = error as { error?: { code?: string }; code?: string };
+  return err.error?.code || err.code;
+}
+
+function isJsonValidateFailure(error: unknown): boolean {
+  const code = getErrorCode(error);
+  const message = getErrorMessage(error);
+  return (
+    code === "json_validate_failed" ||
+    /Failed to validate JSON|json_validate_failed/i.test(message)
+  );
+}
+
 function mapGroqError(error: unknown): AiProviderError {
   if (error instanceof AiProviderError) return error;
 
-  const err = error as {
-    status?: number;
-    message?: string;
-    error?: { message?: string };
-  };
+  const err = error as { status?: number };
   const status = err.status;
-  const message =
-    err.error?.message || err.message || "Groq provider request failed";
+  const message = getErrorMessage(error);
 
   if (status === 429) {
     return new AiProviderError(
@@ -102,6 +122,14 @@ function mapGroqError(error: unknown): AiProviderError {
       "MISSING_API_KEY",
       status,
       false,
+    );
+  }
+  if (isJsonValidateFailure(error)) {
+    return new AiProviderError(
+      "Groq structured output validation failed for this note batch. Retrying with a smaller batch.",
+      "INVALID_RESPONSE",
+      status ?? 400,
+      true,
     );
   }
   if (typeof message === "string" && /quota|billing/i.test(message)) {
@@ -122,7 +150,7 @@ async function withRetries<T>(
       lastError = error;
       const mapped = mapGroqError(error);
       if (!mapped.retryable || i === attempts - 1) throw mapped;
-      await new Promise((r) => setTimeout(r, 500 * (i + 1)));
+      await new Promise((r) => setTimeout(r, 600 * (i + 1)));
     }
   }
   throw mapGroqError(lastError);
@@ -137,7 +165,7 @@ export class GroqProvider implements AiProvider {
     this.model = model;
     const apiKey = process.env.GROQ_API_KEY;
     if (apiKey) {
-      this.client = new Groq({ apiKey, timeout: 60_000 });
+      this.client = new Groq({ apiKey, timeout: 90_000 });
     }
   }
 
@@ -157,10 +185,134 @@ export class GroqProvider implements AiProvider {
     return this.client;
   }
 
+  private async extractBatch(
+    batch: ExtractSignalsInput["notes"],
+    catalogJson: string,
+    mode: "strict" | "json_object",
+  ): Promise<{
+    signals: ExtractSignalsResult["signals"];
+    promptTokens: number;
+    completionTokens: number;
+  }> {
+    const client = this.getClient();
+    const completion = await withRetries(() =>
+      client.chat.completions.create({
+        model: this.model,
+        temperature: 0.1,
+        messages: [
+          { role: "system", content: SIGNAL_EXTRACTION_SYSTEM_PROMPT },
+          {
+            role: "user",
+            content: buildExtractionUserPrompt({
+              notesJson: JSON.stringify(batch, null, 2),
+              catalogJson,
+            }),
+          },
+        ],
+        response_format:
+          mode === "strict"
+            ? {
+                type: "json_schema",
+                json_schema: {
+                  name: "demand_signals",
+                  strict: true,
+                  schema: EXTRACTION_JSON_SCHEMA,
+                },
+              }
+            : { type: "json_object" },
+      }),
+    );
+
+    const content = completion.choices[0]?.message?.content;
+    if (!content) {
+      throw new AiProviderError(
+        "Groq returned an empty extraction response.",
+        "INVALID_RESPONSE",
+        undefined,
+        true,
+      );
+    }
+
+    let parsedJson: unknown;
+    try {
+      parsedJson = JSON.parse(content);
+    } catch {
+      throw new AiProviderError(
+        "Groq returned non-JSON content.",
+        "INVALID_RESPONSE",
+        undefined,
+        true,
+      );
+    }
+
+    const validated = extractedSignalsResponseSchema.safeParse(parsedJson);
+    if (!validated.success) {
+      throw new AiProviderError(
+        "Groq response failed Zod validation.",
+        "INVALID_RESPONSE",
+        undefined,
+        mode === "strict",
+      );
+    }
+
+    return {
+      signals: validated.data.signals,
+      promptTokens: completion.usage?.prompt_tokens ?? 0,
+      completionTokens: completion.usage?.completion_tokens ?? 0,
+    };
+  }
+
+  private async extractBatchWithFallback(
+    batch: ExtractSignalsInput["notes"],
+    catalogJson: string,
+  ): Promise<{
+    signals: ExtractSignalsResult["signals"];
+    promptTokens: number;
+    completionTokens: number;
+  }> {
+    try {
+      return await this.extractBatch(batch, catalogJson, "strict");
+    } catch (error) {
+      const mapped = mapGroqError(error);
+
+      // Split oversized batches that fail constrained decoding.
+      if (
+        mapped.code === "INVALID_RESPONSE" &&
+        batch.length > 1 &&
+        (isJsonValidateFailure(error) || mapped.retryable)
+      ) {
+        const mid = Math.ceil(batch.length / 2);
+        const left = await this.extractBatchWithFallback(
+          batch.slice(0, mid),
+          catalogJson,
+        );
+        const right = await this.extractBatchWithFallback(
+          batch.slice(mid),
+          catalogJson,
+        );
+        return {
+          signals: [...left.signals, ...right.signals],
+          promptTokens: left.promptTokens + right.promptTokens,
+          completionTokens: left.completionTokens + right.completionTokens,
+        };
+      }
+
+      // Last resort for a single note: json_object + Zod (still no silent mocks).
+      if (batch.length === 1) {
+        try {
+          return await this.extractBatch(batch, catalogJson, "json_object");
+        } catch (fallbackError) {
+          throw mapGroqError(fallbackError);
+        }
+      }
+
+      throw mapped;
+    }
+  }
+
   async extractSignals(
     input: ExtractSignalsInput,
   ): Promise<ExtractSignalsResult> {
-    const client = this.getClient();
     const uniqueCatalog = Array.from(
       new Map(
         input.salesContext.map((row) => [
@@ -168,71 +320,30 @@ export class GroqProvider implements AiProvider {
           row,
         ]),
       ).values(),
-    ).slice(0, 100);
+    ).slice(0, 40);
 
-    const batchSize = 8;
+    const catalogJson = JSON.stringify(uniqueCatalog, null, 2);
+    const batches: ExtractSignalsInput["notes"][] = [];
+    for (let i = 0; i < input.notes.length; i += DEFAULT_BATCH_SIZE) {
+      batches.push(input.notes.slice(i, i + DEFAULT_BATCH_SIZE));
+    }
+
+    // Limited concurrency keeps latency down without blowing free-tier RPM/TPM.
+    const concurrency = 2;
     const allSignals: ExtractSignalsResult["signals"] = [];
     let promptTokens = 0;
     let completionTokens = 0;
 
-    for (let i = 0; i < input.notes.length; i += batchSize) {
-      const batch = input.notes.slice(i, i + batchSize);
-      const completion = await withRetries(() =>
-        client.chat.completions.create({
-          model: this.model,
-          temperature: 0.1,
-          messages: [
-            { role: "system", content: SIGNAL_EXTRACTION_SYSTEM_PROMPT },
-            {
-              role: "user",
-              content: buildExtractionUserPrompt({
-                notesJson: JSON.stringify(batch, null, 2),
-                catalogJson: JSON.stringify(uniqueCatalog, null, 2),
-              }),
-            },
-          ],
-          response_format: {
-            type: "json_schema",
-            json_schema: {
-              name: "demand_signals",
-              strict: true,
-              schema: EXTRACTION_JSON_SCHEMA,
-            },
-          },
-        }),
+    for (let i = 0; i < batches.length; i += concurrency) {
+      const slice = batches.slice(i, i + concurrency);
+      const results = await Promise.all(
+        slice.map((batch) => this.extractBatchWithFallback(batch, catalogJson)),
       );
-
-      const content = completion.choices[0]?.message?.content;
-      if (!content) {
-        throw new AiProviderError(
-          "Groq returned an empty extraction response.",
-          "INVALID_RESPONSE",
-        );
+      for (const extracted of results) {
+        allSignals.push(...extracted.signals);
+        promptTokens += extracted.promptTokens;
+        completionTokens += extracted.completionTokens;
       }
-
-      let parsedJson: unknown;
-      try {
-        parsedJson = JSON.parse(content);
-      } catch {
-        throw new AiProviderError(
-          "Groq returned non-JSON content.",
-          "INVALID_RESPONSE",
-        );
-      }
-
-      const validated = extractedSignalsResponseSchema.safeParse(parsedJson);
-      if (!validated.success) {
-        throw new AiProviderError(
-          "Groq response failed Zod validation.",
-          "INVALID_RESPONSE",
-          undefined,
-          false,
-        );
-      }
-
-      allSignals.push(...validated.data.signals);
-      promptTokens += completion.usage?.prompt_tokens ?? 0;
-      completionTokens += completion.usage?.completion_tokens ?? 0;
     }
 
     return {

@@ -8,6 +8,8 @@ import { AiProviderError } from "@/providers/ai/ai.types";
 import { analyzeRequestSchema } from "@/schemas/signal";
 import type { AnalysisResult } from "@/types/domain";
 
+export const maxDuration = 300;
+
 export async function POST(request: Request) {
   const requestId = createRequestId();
 
@@ -84,8 +86,12 @@ export async function POST(request: Request) {
           ? 503
           : error.code === "RATE_LIMITED"
             ? 429
-            : 502;
-      return jsonError(status, error.code, error.message, requestId);
+            : error.code === "INVALID_RESPONSE"
+              ? 502
+              : 502;
+      // Prefer clean provider messages over raw nested JSON blobs.
+      const message = error.message.replace(/^400\s+/, "").trim();
+      return jsonError(status, error.code, message, requestId);
     }
 
     return jsonError(

@@ -28,11 +28,12 @@ GROQ_MODEL=openai/gpt-oss-20b
 
 ## Behavior rules
 
-1. Batch notes to respect free-tier rate limits
-2. Retry only retryable failures (e.g. 429) with bounded backoff
-3. On failure, surface a clear error — never fabricate signals
-4. Confidence and potentialImpact are separate metrics
-5. Unknown entities become `null` / `UNRESOLVED_ENTITIES`
+1. Batch notes in small groups (default 3) — larger strict-schema batches can fail on `openai/gpt-oss-20b`
+2. On `json_validate_failed`, split the batch and retry; for a single note, fall back to `json_object` + Zod
+3. Retry only retryable failures (429 / JSON validate) with bounded backoff
+4. On failure, surface a clear error — never fabricate signals
+5. Confidence and potentialImpact are separate metrics
+6. Unknown entities become `null` / `UNRESOLVED_ENTITIES`
 
 ## Adding another provider later
 
